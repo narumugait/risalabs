@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RISA Funnels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f5f8; --card:#ffffff; --ink:#181c29; --ink-2:#5b6377; --ink-3:#a1a7b7;
+    --line:#e7e9f0; --line-2:#dbdfe9; --shadow:0 1px 2px rgba(20,26,48,.05),0 16px 36px -22px rgba(20,26,48,.24);
+    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --engine:#4b56c8; --careteam:#0f8a7e; --patient:#c06a2e; --payer:#7c53c9; --system:#7b8296;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
+  body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+  .head{padding:20px 30px 0;display:flex;flex-direction:column;gap:12px}
+  .toggle{display:inline-flex;align-self:flex-start;background:#eceef4;border:1px solid var(--line);border-radius:12px;padding:3px}
+  .toggle button{border:0;background:transparent;font-family:var(--display);font-weight:500;font-size:13.5px;color:var(--ink-2);
+    padding:8px 17px;border-radius:9px;cursor:pointer;transition:.16s;letter-spacing:-.01em}
+  .toggle button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(20,26,48,.09)}
+  .brand h1{font-family:var(--display);font-weight:600;font-size:26px;letter-spacing:-.02em;margin:0;line-height:1.05}
+  .brand p{margin:5px 0 0;font-weight:450;color:var(--ink-2);font-size:14.5px}
+  .legend{margin-top:11px;display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px}
+  .lg{display:inline-flex;align-items:center;gap:7px;font-weight:500}
+  .lg i{width:9px;height:9px;border-radius:50%}
+
+  .stage{flex:1 1 auto;position:relative;margin:14px 22px 0}
+  .scroll{position:absolute;inset:0;overflow:auto;scroll-behavior:smooth}
+  .scroll::-webkit-scrollbar{height:9px;width:9px}
+  .scroll::-webkit-scrollbar-thumb{background:#d6d9e4;border-radius:5px}
+  .canvas{position:relative}
+  svg.bg{position:absolute;inset:0;pointer-events:none;overflow:visible}
+
+  .node{position:absolute;border-radius:14px;border:1px solid var(--line);background:var(--card);
+    padding:13px 15px 12px;transition:opacity .34s cubic-bezier(.4,0,.2,1),box-shadow .34s,transform .2s,border-color .34s;
+    opacity:.46;cursor:pointer;box-shadow:0 1px 2px rgba(20,26,48,.04)}
+  .node:hover{opacity:.8}
+  .node .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .node .tag .dot{width:8px;height:8px;border-radius:50%}
+  .node .nt{margin-top:8px;font-family:var(--display);font-weight:500;font-size:15px;line-height:1.24;letter-spacing:-.015em;color:var(--ink)}
+  .node .foot{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-2)}
+  .node .foot .mn{font-weight:600;color:var(--ink)}
+  .node .foot .pct{font-family:var(--display);font-weight:600;font-size:11px;padding:2px 7px;border-radius:999px;background:#eef0f5;color:var(--ink-2)}
+  .node.active{opacity:1;transform:translateY(-2px)}
+
+  /* EMR block, not a step card */
+  .node.system{background:transparent;border:none;box-shadow:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:9px;opacity:.55}
+  .node.system:hover{opacity:.85}
+  .node.system .emr-icon{width:66px;height:66px;border-radius:18px;background:#edeff4;border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;color:var(--system);transition:.3s}
+  .node.system .emr-label{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.03em;color:var(--ink-2)}
+  .node.system.active{opacity:1}
+  .node.system.active .emr-icon{border-color:var(--system);color:#565d70;box-shadow:0 0 0 3px rgba(123,130,150,.16)}
+
+  .marching{fill:none;stroke-linecap:round}
+  @media (prefers-reduced-motion: no-preference){.marching.live{animation:mm 1s linear infinite}}
+  @keyframes mm{to{stroke-dashoffset:-16}}
+
+  .detail{flex:0 0 auto;margin:14px 22px 18px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px 24px}
+  .dhead{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  .dcat{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;display:inline-flex;align-items:center;gap:7px}
+  .dcat .dot{width:8px;height:8px;border-radius:50%}
+  .dtitle{font-family:var(--display);font-weight:500;font-size:22px;letter-spacing:-.02em}
+  .metrics{margin-left:auto;display:flex;gap:24px;align-items:baseline}
+  .metric{text-align:right}.metric .v{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.01em}
+  .metric .k{font-size:10.5px;color:var(--ink-3);font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+  .metric.drop .v{color:#c0453c}
+  .ddesc{margin-top:11px;color:#3a4256;font-size:15px;max-width:78ch;line-height:1.6}
+  .ex{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .ex .lbl{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+  .ex .txt{margin-top:5px;font-size:14px;color:#404860;line-height:1.55}
+  .ex .txt code{background:#eef0f7;color:#3c4570;padding:1px 6px;border-radius:5px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="toggle" id="toggle">
+      <button data-k="ct" class="on">Clinical trials</button>
+      <button data-k="pa">Prior authorization</button>
+    </div>
+    <div class="brand"><h1 id="ftitle"></h1><p id="fsub"></p></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="stage">
+    <div class="scroll" id="scroll" tabindex="0">
+      <div class="canvas" id="canvas"><svg class="bg" id="bg"></svg></div>
+    </div>
+  </div>
+
+  <div class="detail" id="detail"></div>
+
+<script>
+const COLORS={engine:"#4b56c8",careteam:"#0f8a7e",patient:"#c06a2e",payer:"#7c53c9",system:"#7b8296"};
+const SOFT  ={engine:"rgba(75,86,200,.15)",careteam:"rgba(15,138,126,.15)",patient:"rgba(192,106,46,.15)",payer:"rgba(124,83,201,.15)"};
+const CATNAME={engine:"RISA engine",careteam:"Care team",patient:"Patient",payer:"Payer",system:"System of record"};
+const EMR_ICON=`<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>`;
+
+function n(id,col,row,cat,t,desc,ex,pct,count){return {id,col,row,cat,t,desc,ex,pct,count};}
+
+const FUNNELS={
+ ct:{
+  title:"Clinical Trial Patient Matching Funnel", sub:"Charts read from the EMR, matched to a protocol, results written back",
+  unit:"matches", denom:"of MRNs", exlabel:"Example, BNT327-06", showDrop:true, legend:["engine","careteam","patient"],
+  nodes:[
+   n("emr",0,0,"system","EMR","The practice EMR is the system of record. Charts are read from it over a live FHIR feed, and enrollment status is written back into it.","Charts stream in through the FHIR connection; the match and enrollment status post back to the patient record."),
+   n("mrns",1,0,"engine","MRNs screened","Every unique patient chart on the practice EMR enters the funnel. Coverage is 100 percent by design; no chart is pre-filtered before matching.","The feed exposes <code>Condition</code>, <code>Observation</code>, <code>MedicationRequest</code> and <code>Procedure</code> for every MRN.",100,100000),
+   n("dx",2,0,"engine","Diagnosis match confirmed","The engine confirms the patient's diagnosis aligns with the trial indication. Charts that do not match the target indication drop out here.","Atom <code>I4a</code> checks for histologically confirmed NSCLC using <code>Condition</code> ICD-10 C34.x and the pathology histology.",22,22000),
+   n("chunks",3,0,"engine","Independently evaluable chunks matched against patient records","The protocol's criteria are broken into independently evaluable chunks, and each chunk is matched against the patient record on its own.","The organ-function criterion <code>I7</code> alone becomes 14 atoms, from <code>I7a</code> ANC to <code>I7m</code> aPTT, each with its own LOINC code.",20,20000),
+   n("missing",4,0,"careteam","Missing information flagged for CRC action","Chunks that cannot be resolved from the chart are flagged for the CRC to obtain, rather than scored as a fail. 112 of the 158 atoms route to review when their data is absent.","Atom <code>I2e</code>, documented PD-L1 (22C3) status, is usually only in a scanned report, so it is flagged for the CRC to obtain.",16,16000),
+   n("stale",5,0,"careteam","Stale information flagged for re-run of reports","Values resolved against data past their validity window are flagged so the reports are re-run against current results. 62 atoms carry a staleness window.","Atom <code>I6a</code> ECOG is valid within 14 days and atom <code>I7a</code> ANC within 28 days; stale values trigger a re-run.",15,15000),
+   n("mincrit",6,0,"engine","Patient crosses minimum requirement criteria for screening","With the gaps closed, the engine confirms the patient clears the minimum required criteria. Every hard stop must pass and no exclusion may fire, which is where most of the cohort falls out.","78 hard stops apply, including <code>I3a</code> age ≥18, the <code>I4-STAGE</code> anyOf gate, <code>E4a</code> no prior platinum, and <code>E4b</code> no prior PD-(L)1.",4.5,4500),
+   n("surf",7,0,"careteam","CRC team surfaces patient to provider","The CRC packages the qualifying match with its per-atom evidence trail and surfaces it to the treating provider for review.","The package lists every passing atom and its FHIR source so the provider can verify the match at a glance.",4.0,4000),
+   n("prev",8,0,"careteam","Provider reviewed","The provider applies clinical judgment the record cannot capture, weighing context around the automated match.","Tier 4 atoms such as <code>I4e</code> and <code>I4f</code> (tumor not amenable to curative surgery or radiotherapy) call for provider judgment.",3.6,3600),
+   n("valid",9,0,"careteam","Validated as good match","The provider confirms the candidate is a genuine fit for the protocol before any patient contact.","The provider confirms fit; borderline cases are set aside for a better fitting trial.",2.2,2200),
+   n("acted",10,0,"careteam","Provider acted on","The provider places the trial referral, moving the candidate from decision to action.","The referral is entered and Substudy A or B is assigned from histology atom <code>I4g</code>.",2.0,2000),
+   n("appr",11,0,"patient","Patient approached","The care team approaches the patient about the trial and opens the consent conversation.","A nurse navigator introduces the trial at the next scheduled visit.",1.8,1800),
+   n("int",12,0,"patient","Patient interested","The patient indicates willingness to proceed toward consent.","The patient asks to review the consent form and schedule screening.",1.2,1200),
+   n("cons",13,0,"patient","Patient consented","The patient signs the informed consent form and formal protocol screening can begin.","Consent atoms <code>I1a</code> (capacity) and <code>I1b</code> (documented written consent per ICH GCP) are satisfied.",1.0,1000),
+   n("scr",14,0,"patient","Patient screened","The formal screening visit confirms the protocol requirements that need in-person assessment.","Screening confirms <code>I5a</code> (measurable lesion per RECIST 1.1), <code>E10i</code> (LVEF ≥50%), and <code>E10m</code> (QTcF ≤480 ms).",0.8,800),
+   n("enr",15,0,"patient","Patient enrolled","The patient is enrolled and on study. The enrollment status is written back into the EMR.","The patient is registered to the protocol and begins treatment; the record updates automatically.",0.6,600),
+  ],
+  edges:[
+   ["emr","mrns","main"],["mrns","dx","main"],["dx","chunks","main"],["chunks","missing","main"],["missing","stale","main"],
+   ["stale","mincrit","main"],["mincrit","surf","main"],["surf","prev","main"],["prev","valid","main"],["valid","acted","main"],
+   ["acted","appr","main"],["appr","int","main"],["int","cons","main"],["cons","scr","main"],["scr","enr","main"],["enr","emr","return"],
+  ]},
+
+ pa:{
+  title:"Prior Authorization Funnel", sub:"Orders read from the EMR, routed and filed, the result written back",
+  unit:"cases", denom:"of orders", exlabel:"Example", showDrop:false, legend:["engine","payer"],
+  nodes:[
+   n("emr",0,0,"system","EMR","The practice EMR is the system of record. Orders are read from it, and the finished authorization is written back into it.","Orders are read as they post; the approved authorization number and dates are written back onto the order."),
+   n("ingest",1,0,"engine","Orders ingested","Every medication and treatment order at the practice enters the queue, read straight from the EMR.","A new infusion order posts and is picked up within minutes, with no staff re-keying.",100,100000),
+   n("check",2,0,"engine","Auth requirement check","The engine checks payer, plan, and drug against current policy, then routes the order to one of three outcomes.","The engine reads the plan and J-code to decide whether an authorization is needed.",100,100000),
+   n("noauth",3,-1,"engine","No auth required","The plan does not require an authorization for this order, so it clears with no filing and no delay to the patient.","A drug on the plan's no-authorization list clears the same day.",33,33000),
+   n("onfile",3,0,"engine","Auth on file","A valid authorization already covers this drug and patient, so the order clears against it.","An authorization from a prior treatment cycle still applies.",22,22000),
+   n("authreq",3,1,"engine","Auth required","A new authorization is needed. The order enters the filing path, which RISA runs on Autopilot.","A first-cycle regimen with no existing authorization needs a fresh submission.",45,45000),
+   n("mednec",4,0,"engine","Medical necessity check","Every routed order is checked for medical necessity against payer policy and clinical guidelines. No-auth and auth-on-file cases resolve here; auth-required cases proceed to filing.","Diagnosis, staging, and prior therapy are checked against the policy's necessity criteria.",100,100000),
+   n("query",5,-1.25,"engine","Raise query","If the necessity check finds missing information, RISA raises a query to close the gap before filing. This is a sub-branch off the main spine.","A missing pathology result triggers a query to the ordering provider."),
+   n("queryok",6,-1.25,"engine","Query approved","The query is resolved and the order returns to the filing path with a complete record.","The provider supplies the result and the order proceeds to filing."),
+   n("portal",5,0,"engine","Payer portal form filling","RISA fills the payer's portal form with the order and clinical details.","The payer's web form is populated automatically from the record.",45,45000),
+   n("docs",6,0,"engine","Clinical documentation attachment","Supporting clinical documentation is attached to the submission.","Chart notes, pathology, and prior therapy records are attached.",45,45000),
+   n("quest",7,0,"engine","Clinical questionnaire filling","Payer-specific clinical questionnaires are completed from the record.","The plan's oncology questionnaire is answered from structured data.",45,45000),
+   n("submit",8,0,"engine","Submission","The completed authorization request is submitted to the payer.","The packet is transmitted through the payer's channel.",45,45000),
+   n("status",9,0,"payer","Status tracking","RISA tracks the request to a decision. First-submission approval exceeds 97 percent, against an industry benchmark near 81 percent.","The case is monitored until the payer returns a determination.",43.7,43700),
+   n("wb",10,0,"engine","Write back to EMR","The authorization number and validity dates are written back into the EMR, ready for scheduling with no re-keying.","The result posts onto the order, ready for the treatment date.",43.7,43700),
+  ],
+  edges:[
+   ["emr","ingest","main"],["ingest","check","main"],
+   ["check","noauth","branch"],["check","onfile","branch"],["check","authreq","branch"],
+   ["noauth","mednec","converge"],["onfile","mednec","converge"],["authreq","mednec","converge"],
+   ["mednec","portal","main"],
+   ["mednec","query","sub"],["query","queryok","sub"],["queryok","portal","sub"],
+   ["portal","docs","main"],["docs","quest","main"],["quest","submit","main"],["submit","status","main"],["status","wb","main"],
+   ["wb","emr","return"],
+  ]},
+};
+
+const W=196, EMRW=88, PITCH=246, X0=40, ROWGAP=118;
+const canvas=document.getElementById("canvas"), bg=document.getElementById("bg"), scroll=document.getElementById("scroll");
+const NS="http://www.w3.org/2000/svg";
+function E(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function fmtPct(p){return (p<1?p.toFixed(1):p===Math.round(p)?p:p.toFixed(1))+"%";}
+function fmtNum(x){return x.toLocaleString("en-US");}
+function nW(nd){return nd.cat==="system"?EMRW:W;}
+
+let FK="ct", A=FUNNELS.ct, NODES=A.nodes, byId={}, el={}, sel=null;
+let CANW=0, CANH=440, CY=220, lastId=null;
+
+function measure(){
+  byId={}; NODES.forEach(x=>byId[x.id]=x);
+  const maxCol=Math.max(...NODES.map(x=>x.col));
+  const minRow=Math.min(...NODES.map(x=>x.row)), maxRow=Math.max(...NODES.map(x=>x.row));
+  CANW=X0+maxCol*PITCH+W+40;
+  const span=(maxRow-minRow)*ROWGAP+240;
+  CANH=Math.max(scroll.clientHeight, span, 400);
+  CY=Math.round(CANH/2 - ((minRow+maxRow)/2)*ROWGAP);
+  canvas.style.width=CANW+"px"; canvas.style.height=CANH+"px";
+  bg.setAttribute("width",CANW); bg.setAttribute("height",CANH); bg.setAttribute("viewBox",`0 0 ${CANW} ${CANH}`);
+  NODES.forEach(nd=>{ nd.x=X0+nd.col*PITCH; nd.cy=CY+nd.row*ROWGAP; });
+}
+function buildNodes(){
+  [...canvas.querySelectorAll(".node")].forEach(x=>x.remove()); el={};
+  NODES.forEach(nd=>{
+    const c=COLORS[nd.cat];
+    const d=document.createElement("div");
+    if(nd.cat==="system"){
+      d.className="node system"; d.style.width=EMRW+"px";
+      d.innerHTML=`<div class="emr-icon">${EMR_ICON}</div><div class="emr-label">EMR</div>`;
+    } else {
+      d.className="node"; d.style.width=W+"px";
+      const foot = nd.pct!=null?`<div class="foot"><span class="mn">${fmtNum(nd.count)}</span> ${A.unit} <span class="pct">${fmtPct(nd.pct)}</span></div>`:"";
+      d.innerHTML=`<div class="tag" style="color:${c}"><span class="dot" style="background:${c}"></span>${CATNAME[nd.cat]}</div>
+        <div class="nt">${nd.t}</div>${foot}`;
+    }
+    d.addEventListener("click",()=>select(nd.id));
+    canvas.appendChild(d); el[nd.id]=d;
+  });
+}
+function place(){ NODES.forEach(nd=>{ const d=el[nd.id]; if(!d)return; const h=d.offsetHeight; d.style.left=nd.x+"px"; d.style.top=(nd.cy-h/2)+"px"; }); }
+
+function ah(id,color){
+  const m=E("marker",{id,viewBox:"0 0 10 10",refX:"7.5",refY:"5",markerWidth:"6.5",markerHeight:"6.5",orient:"auto-start-reverse"});
+  m.appendChild(E("path",{d:"M2 1L8 5L2 9",fill:"none",stroke:color,"stroke-width":"1.7","stroke-linecap":"round","stroke-linejoin":"round"}));
+  return m;
+}
+function edgePath(a,b,type){
+  const aY=a.cy+(el[a.id]?el[a.id].offsetHeight/2:42), bY=b.cy+(el[b.id]?el[b.id].offsetHeight/2:42);
+  if(type==="return"){
+    const low=CANH-46;
+    return `M ${a.x+nW(a)/2} ${aY} C ${a.x+nW(a)/2} ${low}, ${b.x+nW(b)/2} ${low}, ${b.x+nW(b)/2} ${bY}`;
+  }
+  const ax=a.x+nW(a), ay=a.cy, bx=b.x, by=b.cy;
+  const c=Math.max(34,(bx-ax)*0.45);
+  return `M ${ax} ${ay} C ${ax+c} ${ay}, ${bx-c} ${by}, ${bx-9} ${by}`;
+}
+function drawEdges(){
+  [...bg.querySelectorAll(".edge, defs")].forEach(x=>x.remove());
+  const defs=E("defs"); defs.appendChild(ah("ah-l","#c4c8d4")); defs.appendChild(ah("ah-d","#181c29")); defs.appendChild(ah("ah-a","#c8860f")); bg.appendChild(defs);
+  A.edges.forEach(([f,t,type])=>{
+    if(type==="return" && sel!==f) return;           /* return arrow hidden until last step selected */
+    const a=byId[f], b=byId[t]; if(!a||!b) return;
+    const live = sel && (f===sel||t===sel);
+    const sub = type==="sub";
+    const d=edgePath(a,b,type);
+    const stroke = live ? (sub?"#c8860f":"#181c29") : (sub?"#d8c48f":"#c4c8d4");
+    const mk = live ? (sub?"url(#ah-a)":"url(#ah-d)") : "url(#ah-l)";
+    const p=E("path",{class:"edge marching"+(live?" live":""),d,fill:"none",stroke,"marker-end":mk,"stroke-width":live?"2.3":"1.6","stroke-linecap":"round"});
+    if(sub||type==="return") p.setAttribute("stroke-dasharray","6 6");
+    else if(live) p.setAttribute("stroke-dasharray",".5 7.5");
+    bg.appendChild(p);
+  });
+}
+function renderLegend(){
+  document.getElementById("legend").innerHTML=A.legend.map(k=>
+    `<span class="lg" style="color:${COLORS[k]}"><i style="background:${COLORS[k]}"></i>${CATNAME[k]}</span>`).join("");
+}
+function renderDetail(nd){
+  const c=COLORS[nd.cat];
+  let metrics="";
+  if(nd.pct!=null){
+    const i=NODES.indexOf(nd), prev=i>0?NODES[i-1]:null;
+    const drop=(A.showDrop&&prev&&prev.count&&nd.count<prev.count)?`<div class="metric drop"><div class="v">−${Math.round((1-nd.count/prev.count)*100)}%</div><div class="k">vs previous</div></div>`:"";
+    metrics=`<div class="metrics">
+      <div class="metric"><div class="v">${fmtNum(nd.count)}</div><div class="k">${A.unit}</div></div>
+      <div class="metric"><div class="v">${fmtPct(nd.pct)}</div><div class="k">${A.denom}</div></div>${drop}</div>`;
+  }
+  document.getElementById("detail").innerHTML=`
+    <div class="dhead">
+      <span class="dcat" style="color:${c}"><span class="dot" style="background:${c}"></span>${CATNAME[nd.cat]}</span>
+      <span class="dtitle">${nd.t}</span>${metrics}
+    </div>
+    <div class="ddesc">${nd.desc}</div>
+    <div class="ex"><div class="lbl">${A.exlabel}</div><div class="txt">${nd.ex}</div></div>`;
+}
+function select(id){
+  sel=id;
+  NODES.forEach(nd=>{ const d=el[nd.id]; const on=nd.id===id;
+    d.classList.toggle("active",on);
+    if(nd.cat!=="system"){
+      if(on){const c=COLORS[nd.cat];d.style.borderColor=c;d.style.boxShadow=`0 12px 30px -18px rgba(20,26,48,.34), 0 0 0 3px ${SOFT[nd.cat]}`;}
+      else {d.style.borderColor="";d.style.boxShadow="";}
+    }
+  });
+  drawEdges(); renderDetail(byId[id]);
+  const nd=byId[id]; const tx=nd.x+nW(nd)/2-scroll.clientWidth/2;
+  scroll.scrollTo({left:Math.max(0,tx),behavior:"smooth"});
+}
+function load(key){
+  FK=key; A=FUNNELS[key]; NODES=A.nodes; byId={}; NODES.forEach(x=>byId[x.id]=x);
+  lastId=NODES[NODES.length-1].id;
+  document.getElementById("ftitle").textContent=A.title;
+  document.getElementById("fsub").textContent=A.sub;
+  document.querySelectorAll("#toggle button").forEach(b=>b.classList.toggle("on",b.dataset.k===key));
+  measure(); buildNodes(); place(); renderLegend(); drawEdges();
+  select(NODES[0].id);
+}
+function relayout(){ measure(); place(); drawEdges(); }
+document.getElementById("toggle").addEventListener("click",e=>{const b=e.target.closest("button");if(b)load(b.dataset.k);});
+window.addEventListener("resize",relayout);
+new ResizeObserver(()=>relayout()).observe(document.querySelector(".stage"));
+document.addEventListener("keydown",e=>{
+  if(!sel)return; const i=NODES.findIndex(x=>x.id===sel);
+  if(e.key==="ArrowRight"){e.preventDefault();select(NODES[Math.min(NODES.length-1,i+1)].id);}
+  else if(e.key==="ArrowLeft"){e.preventDefault();select(NODES[Math.max(0,i-1)].id);}
+});
+requestAnimationFrame(()=>requestAnimationFrame(()=>{load("ct");scroll.focus();}));
+</script>
+</body>
+</html>
