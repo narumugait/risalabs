@@ -759,7 +759,7 @@ function renderCatFan(nd, srcLabel, showHead){
     <div class="cf-cards" id="cfCards">${renderBuckets(nd)}</div>
   </div>`;
 }
-function renderCategoriesFlow(nd){ return renderCatFan(nd, "Queries raised", true); }
+function renderCategoriesFlow(nd){ return renderCatFan(nd, "Queries raised", false); }
 function layoutCatFlow(){
   const svg=document.getElementById("cfLinks"), cards=document.getElementById("cfCards");
   if(!svg||!cards) return;
