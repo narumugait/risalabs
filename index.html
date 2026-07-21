@@ -4,10 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
-/* Keep the horizontal desktop layout on phones/tablets (no vertical responsive mode) */
+/* Show the horizontal desktop layout on phones too (no vertical responsive mode).
+   IMPORTANT: this must fire ONLY on genuine small phone screens — never on
+   laptops/desktops (including touchscreen laptops), which must keep the natural
+   full-height desktop layout. We gate on a coarse primary pointer AND the
+   physical screen's smaller side being phone-sized. screen.* is the hardware
+   screen, so resizing a desktop browser window can never trigger this. */
 (function(){try{
-  var coarse = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
-  if(coarse || window.innerWidth < 820){
+  var mq = window.matchMedia;
+  var coarse = mq && mq("(pointer:coarse)").matches && !(mq("(pointer:fine)").matches);
+  var shortSide = Math.min(screen.width||9999, screen.height||9999);
+  if(coarse && shortSide < 760){
     var m=document.querySelector('meta[name="viewport"]');
     if(m) m.setAttribute("content","width=1440");
     document.documentElement.setAttribute("data-wide","1");
