@@ -44,6 +44,12 @@
     padding:9px 20px;border-radius:999px;cursor:pointer;transition:.18s cubic-bezier(.4,0,.2,1);letter-spacing:-.01em}
   .toggle button:hover{color:var(--ink)}
   .toggle button.on{background:var(--hero);color:#fff}
+  .wordmark{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.13em;color:var(--accent);margin:0 0 7px;line-height:1;text-transform:uppercase}
+  .wordmark .wm-labs{color:var(--ink-3);font-weight:600;letter-spacing:.10em}
+  .kbd-hint{position:absolute;right:32px;bottom:8px;display:flex;align-items:center;gap:5px;
+    font-family:var(--sans);font-size:11.5px;font-weight:500;color:var(--ink-3);letter-spacing:.005em}
+  .kbd-hint .kk{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:17px;padding:0 5px;
+    background:var(--card);border:1px solid #e2e4ea;border-radius:5px;font-size:11px;font-weight:600;color:var(--ink-2);line-height:1}
   .brand h1{font-family:var(--display);font-weight:700;font-size:30px;letter-spacing:-.025em;margin:0;line-height:1.02}
   .brand p{margin:6px 0 0;font-weight:450;color:var(--ink-2);font-size:14.5px}
   .legend{margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
@@ -222,7 +228,11 @@
       <button data-k="ct" class="on">Clinical trials</button>
       <button data-k="pa">Prior authorization</button>
     </div>
-    <div class="brand"><h1 id="ftitle"></h1><p id="fsub"></p></div>
+    <div class="kbd-hint">Use <span class="kk">&larr;</span> <span class="kk">&rarr;</span> arrow keys or <span class="kk">space</span> to move between steps</div>
+    <div class="brand">
+      <div class="wordmark">RISA<span class="wm-labs">&nbsp;Labs</span></div>
+      <h1 id="ftitle"></h1><p id="fsub"></p>
+    </div>
     <div class="legend" id="legend"></div>
   </div>
 
@@ -247,7 +257,7 @@ function n(id,col,row,cat,t,desc,ex,pct,count){return {id,col,row,cat,t,desc,ex,
 const FUNNELS={
  ct:{
   title:"Clinical Trial Patient Matching Funnel", sub:"Patient charts read from the EMR, matched to a protocol, patients enrolled into clinical trials",
-  exlabel:"Example", legend:["risa","prov","pat"],
+  exlabel:"Example", legend:["risa","prov","pat"], pitch:300,
   nodes:[
    {id:"emr",col:0,row:0,cat:"system",tag:"System of record",t:"OncoEMR",
     desc:"The site's EMR and system of record. RISA reads charts over a live HL7 FHIR R4 connection (via Flatiron) and writes match and enrollment status back.",
@@ -506,7 +516,8 @@ Object.entries(PA_COPY).forEach(([id,o])=>{const nd=FUNNELS.pa.nodes.find(n=>n.i
 {const qa=FUNNELS.pa.nodes.find(n=>n.id==="qaccept"); if(qa) qa.sub="70%+ of queries accepted";}
 let QV={view:"outcomes",detailed:true};
 
-const W=196, EMRW=168, PITCH=246, X0=40, ROWGAP=118;
+const W=196, EMRW=168, X0=40, ROWGAP=118;
+let PITCH=246;
 const canvas=document.getElementById("canvas"), bg=document.getElementById("bg"), scroll=document.getElementById("scroll");
 const NS="http://www.w3.org/2000/svg";
 function E(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
@@ -518,6 +529,7 @@ let FK="ct", A=FUNNELS.ct, NODES=A.nodes, byId={}, el={}, sel=null;
 let CANW=0, CANH=440, CY=220, lastId=null;
 
 function measure(){
+  PITCH = A.pitch || 246;
   byId={}; NODES.forEach(x=>byId[x.id]=x);
   const maxCol=Math.max(...NODES.map(x=>x.col));
   const minRow=Math.min(...NODES.map(x=>x.row)), maxRow=Math.max(...NODES.map(x=>x.row));
