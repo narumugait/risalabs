@@ -52,7 +52,7 @@
     padding:9px 20px;border-radius:999px;cursor:pointer;transition:.18s cubic-bezier(.4,0,.2,1);letter-spacing:-.01em}
   .toggle button:hover{color:var(--ink)}
   .toggle button.on{background:var(--hero);color:#fff}
-  .kbd-hint{position:absolute;right:32px;bottom:8px;display:flex;align-items:center;gap:5px;
+  .kbd-hint{display:inline-flex;align-items:center;gap:5px;
     font-family:var(--sans);font-size:11px;font-weight:400;color:#b6bbc5;letter-spacing:.01em}
   .kbd-hint .kk{display:inline-flex;align-items:center;justify-content:center;min-width:14px;padding:0 3px;
     font-size:11px;font-weight:400;color:#9aa0ac;line-height:1}
@@ -198,10 +198,10 @@
 
   /* View-Denials-Funnel button (Prior Auth page) + back link + standalone page */
   .legend-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .df-open{border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);
+  .df-open{margin-left:auto;border:0;background:transparent;color:var(--accent);
     font-family:var(--display);font-weight:600;font-size:12.5px;letter-spacing:-.005em;
-    padding:8px 15px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s}
-  .df-open:hover{background:var(--accent);color:#fff}
+    padding:6px 2px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s}
+  .df-open:hover{color:var(--ink)}
   .df-open:after{content:"→";font-weight:600}
   .df-back{border:1px solid var(--line);background:var(--card);color:var(--ink-2);
     font-family:var(--display);font-weight:600;font-size:12.5px;padding:7px 14px;border-radius:999px;cursor:pointer;
@@ -258,12 +258,12 @@
       <button data-k="ct" class="on">Clinical trials</button>
       <button data-k="pa">Prior authorization</button>
     </div>
-    <div class="kbd-hint">Use <span class="kk">&larr;</span> <span class="kk">&rarr;</span> arrow keys or <span class="kk">space</span> to move between steps</div>
     <div class="brand">
       <h1 id="ftitle"></h1><p id="fsub"></p>
     </div>
     <div class="legend-row">
       <div class="legend" id="legend"></div>
+      <div class="kbd-hint">Use <span class="kk">&larr;</span> <span class="kk">&rarr;</span> arrow keys or <span class="kk">space</span> to move between steps</div>
       <button class="df-open" id="dfOpen" hidden>View Denials Funnel</button>
     </div>
   </div>
