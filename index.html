@@ -6,14 +6,14 @@
 <title>RISA Funnels</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#ffffff; --card:#f1f2f5; --card-hover:#eceef2; --hero:#0c0e13;
     --ink:#0c0e13; --ink-2:#6b7280; --ink-3:#a2a8b4;
     --line:#ececf0; --shadow:0 1px 2px rgba(12,14,19,.04),0 18px 44px -26px rgba(12,14,19,.22);
     --accent:#0F5BFF; --accent-soft:rgba(15,91,255,.10); --accent-ring:rgba(15,91,255,.16);
-    --display:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --display:"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     --engine:#0F5BFF; --careteam:#0f8a7e; --patient:#c06a2e; --payer:#7c53c9; --system:#7b8296;
     --r:20px;
@@ -23,8 +23,8 @@
     -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
   body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
-  .head{padding:24px 32px 0;display:flex;flex-direction:column;gap:14px}
-  .toggle{display:inline-flex;align-self:flex-start;background:var(--card);border-radius:999px;padding:4px;gap:2px}
+  .head{position:relative;padding:24px 32px 0;display:flex;flex-direction:column;gap:14px}
+  .toggle{position:absolute;top:24px;right:32px;z-index:5;display:inline-flex;background:var(--card);border-radius:999px;padding:4px;gap:2px}
   .toggle button{border:0;background:transparent;font-family:var(--display);font-weight:500;font-size:13.5px;color:var(--ink-2);
     padding:9px 20px;border-radius:999px;cursor:pointer;transition:.18s cubic-bezier(.4,0,.2,1);letter-spacing:-.01em}
   .toggle button:hover{color:var(--ink)}
@@ -41,15 +41,19 @@
   .scroll::-webkit-scrollbar-thumb{background:#dfe2e9;border-radius:6px;border:2px solid var(--bg)}
   .scroll::-webkit-scrollbar-thumb:hover{background:#cfd3dd}
   .canvas{position:relative}
-  svg.bg{position:absolute;inset:0;pointer-events:none;overflow:visible}
+  svg.bg{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1}
+  .group{position:absolute;z-index:0;border:1px solid var(--line);background:#fafbfc;border-radius:20px;pointer-events:none}
+  .group-lbl{position:absolute;top:12px;left:18px;font-family:var(--display);font-weight:600;font-size:13.5px;letter-spacing:-.01em;color:var(--ink-2);background:#fafbfc;padding:0 6px}
 
-  .node{position:absolute;border-radius:var(--r);border:1px solid transparent;background:var(--card);
+  .node{position:absolute;z-index:2;border-radius:var(--r);border:1px solid transparent;background:var(--card);
     padding:15px 17px 14px;transition:opacity .34s cubic-bezier(.4,0,.2,1),background .3s,box-shadow .34s,transform .24s cubic-bezier(.4,0,.2,1),color .3s;
-    opacity:.62;cursor:pointer}
-  .node:hover{opacity:.9;background:var(--card-hover)}
-  .node .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+    opacity:1;cursor:pointer}
+  .node:hover{background:var(--card-hover)}
+  .node .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:11.5px;font-weight:600;letter-spacing:-.005em}
   .node .tag .dot{width:8px;height:8px;border-radius:50%}
   .node .nt{margin-top:9px;font-family:var(--display);font-weight:500;font-size:15px;line-height:1.26;letter-spacing:-.015em;color:var(--ink)}
+  .node .nt-sub{margin-top:7px;font-size:11.5px;font-weight:500;color:var(--ink-2)}
+  .node.active .nt-sub{color:rgba(255,255,255,.72)}
   .node .foot{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-2)}
   .node .foot .mn{font-weight:600;color:var(--ink)}
   .node .foot .pct{font-family:var(--display);font-weight:600;font-size:11px;padding:2px 8px;border-radius:999px;background:#e3e6ec;color:#5b6270}
@@ -62,22 +66,28 @@
   .node.active .foot .mn{color:#fff}
   .node.active .foot .pct{background:var(--accent);color:#fff}
 
-  /* EMR block, not a step card */
-  .node.system{background:transparent;border:none;box-shadow:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:.62}
-  .node.system:hover{opacity:.9;background:transparent}
-  .node.system .emr-icon{width:70px;height:70px;border-radius:var(--r);background:var(--card);border:1px solid transparent;display:flex;align-items:center;justify-content:center;color:var(--system);transition:.3s}
-  .node.system .emr-label{font-family:var(--display);font-weight:600;font-size:13px;letter-spacing:.03em;color:var(--ink-2)}
-  .node.system.active{opacity:1;transform:none;box-shadow:none;background:transparent}
-  .node.system.active .emr-icon{background:var(--hero);border-color:var(--hero);color:#fff;box-shadow:0 12px 28px -14px rgba(12,14,19,.5)}
-  .node.system.active .emr-label{color:var(--ink)}
+  /* System of record — OncoEMR logo lockup */
+  .node.system{background:var(--card);border:1px solid transparent;border-radius:16px;padding:15px 17px;display:flex;align-items:center;justify-content:center;opacity:1;
+    transition:opacity .34s cubic-bezier(.4,0,.2,1),background .3s,box-shadow .34s,transform .24s cubic-bezier(.4,0,.2,1)}
+  .node.system:hover{background:var(--card-hover)}
+  .emr-logo{display:flex;align-items:center;gap:10px}
+  .emr-mark{display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .emr-word{font-family:var(--display);font-size:16px;letter-spacing:-.01em;color:var(--ink);white-space:nowrap;display:inline-flex;align-items:flex-start}
+  .emr-word b{font-weight:700}
+  .emr-word .e2{font-weight:500;margin-left:3px}
+  .emr-word sup{font-size:8px;font-weight:500;margin-left:1px;line-height:1;color:var(--ink-3)}
+  .node.system.active{opacity:1;transform:translateY(-3px);background:var(--hero);
+    box-shadow:0 20px 44px -22px rgba(12,14,19,.55),0 2px 6px rgba(12,14,19,.12)}
+  .node.system.active .emr-word{color:#fff}
+  .node.system.active .emr-word sup{color:rgba(255,255,255,.6)}
 
   .marching{fill:none;stroke-linecap:round}
   @media (prefers-reduced-motion: no-preference){.marching.live{animation:mm 1s linear infinite}}
   @keyframes mm{to{stroke-dashoffset:-16}}
 
-  .detail{flex:0 0 auto;margin:16px 24px 20px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 26px}
-  .dhead{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
-  .dcat{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;display:inline-flex;align-items:center;gap:7px}
+  .detail{flex:0 0 auto;margin:16px 24px 20px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 26px;max-height:54vh;overflow:auto}
+  .dhead{display:flex;align-items:flex-start;gap:13px;flex-wrap:wrap}
+  .dcat{font-family:var(--display);font-size:12.5px;font-weight:600;letter-spacing:-.005em;display:inline-flex;align-items:center;gap:7px}
   .dcat .dot{width:8px;height:8px;border-radius:50%}
   .dtitle{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.025em}
   .metrics{margin-left:auto;display:flex;gap:26px;align-items:baseline}
@@ -90,6 +100,104 @@
   .ex .lbl{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
   .ex .txt{margin-top:6px;font-size:14px;color:#404860;line-height:1.55}
   .ex .txt code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:5px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
+
+  /* Query step — two views */
+  .qv-toggle{display:inline-flex;background:var(--card);border-radius:999px;padding:3px;gap:2px;margin-top:15px}
+  .qv-toggle button{border:0;background:transparent;font-family:var(--display);font-weight:500;font-size:12.5px;color:var(--ink-2);padding:7px 16px;border-radius:999px;cursor:pointer;transition:.16s}
+  .qv-toggle button:hover{color:var(--ink)}
+  .qv-toggle button.on{background:var(--hero);color:#fff}
+  .qv-body{margin-top:16px}
+
+  /* outcomes bars */
+  .oc-row{display:grid;grid-template-columns:220px 1fr 54px;align-items:center;gap:14px;font-size:13px;margin-bottom:12px}
+  .oc-label{color:var(--ink)}
+  .oc-track{height:9px;background:#e7e9ef;border-radius:999px;overflow:hidden}
+  .oc-fill{height:100%;border-radius:999px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+  .oc-pct{font-family:var(--display);font-weight:600;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+  .oc-cap{margin-top:14px;font-size:11.5px;color:var(--ink-3);max-width:78ch;line-height:1.5}
+
+  /* query-type buckets */
+  .bk{display:grid;grid-template-columns:66px 1fr 30px;align-items:start;gap:16px;padding:14px 0;border-top:1px solid var(--line)}
+  .bk:first-child{border-top:0}
+  .bk-pct{font-family:var(--display);font-weight:600;font-size:13px;color:#fff;background:var(--hero);border-radius:9px;padding:8px 2px;text-align:center;letter-spacing:-.01em}
+  .bk-name{font-family:var(--display);font-weight:600;font-size:14.5px;letter-spacing:-.01em;color:var(--ink);line-height:1.25}
+  .bk-def{margin-top:5px;font-size:12.5px;color:var(--ink-2);line-height:1.5;max-width:72ch}
+  .bk-eye{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;color:var(--ink-3);cursor:help;outline:none;transition:.15s}
+  .bk-eye:hover,.bk-eye:focus-visible{color:var(--accent);background:var(--accent-soft)}
+  .bk-pop{position:absolute;right:calc(100% + 12px);top:-8px;width:320px;background:var(--hero);color:#fff;border-radius:14px;padding:14px 16px;
+    box-shadow:0 22px 54px -20px rgba(12,14,19,.6);opacity:0;visibility:hidden;transform:translateX(6px);transition:.16s cubic-bezier(.4,0,.2,1);z-index:30;pointer-events:none}
+  .bk-eye:hover .bk-pop,.bk-eye:focus-within .bk-pop{opacity:1;visibility:visible;transform:translateX(0)}
+  .bk-pop b{display:block;font-family:var(--display);font-weight:600;font-size:13px;margin-bottom:6px;color:#fff}
+  .bk-pop i{font-style:normal;font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.82)}
+  .bk-pop:after{content:"";position:absolute;right:-5px;top:18px;width:11px;height:11px;background:var(--hero);transform:rotate(45deg)}
+
+  /* detailed dropdown + donut */
+  .qd-more{margin-top:18px;border-top:1px solid var(--line);padding-top:15px}
+  .qd-more-btn{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;font-family:var(--display);font-weight:600;font-size:12.5px;color:var(--accent);padding:0}
+  .qd-more-btn .chev{transition:transform .2s}
+  .qd-more-btn.open .chev{transform:rotate(90deg)}
+  .qd-pie-wrap{margin-top:18px;display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:center}
+  @media (max-width:760px){.qd-pie-wrap{grid-template-columns:1fr;justify-items:center}}
+  .qd-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 28px}
+  .qd-leg{display:grid;grid-template-columns:11px 1fr auto;align-items:center;gap:10px;font-size:12px}
+  .qd-leg i{width:11px;height:11px;border-radius:3px}
+  .qd-leg .lb{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qd-leg .pc{font-family:var(--display);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .qd-cap{margin-top:12px;font-size:11px;color:var(--ink-3)}
+
+  /* popover bullets */
+  .bk-pop ul{margin:10px 0 0;padding:0;list-style:none}
+  .bk-pop li{position:relative;padding-left:15px;font-size:12px;line-height:1.5;color:rgba(255,255,255,.82);margin:6px 0}
+  .bk-pop li:before{content:"";position:absolute;left:1px;top:7px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+
+  /* outcomes flowchart */
+  .flow{display:flex;align-items:center;margin-top:4px}
+  .flow-pre{flex:0 0 auto;background:#f5f6f8;border:1px solid var(--line);border-radius:12px;padding:12px 15px;text-align:left}
+  .flow-pre-p{font-family:var(--display);font-weight:600;font-size:18px;color:var(--ink-3);line-height:1;letter-spacing:-.01em}
+  .flow-pre-l{font-size:11px;color:var(--ink-3);margin-top:5px}
+  .flow-a{flex:0 0 auto;margin:0 8px}
+  .flow-src{flex:0 0 auto;background:var(--hero);color:#fff;border-radius:14px;padding:15px 17px}
+  .flow-src-pct{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.02em;line-height:1}
+  .flow-src-title{font-family:var(--display);font-weight:600;font-size:15px;color:#fff;letter-spacing:-.01em;line-height:1.2}
+  .flow-src-l{font-size:12px;color:rgba(255,255,255,.68);margin-top:5px}
+  .flow-links{flex:0 0 auto;display:block}
+  .flow-outs{flex:1 1 auto;display:flex;flex-direction:column;gap:12px}
+  .flow-out{height:46px;display:flex;align-items:center;gap:13px;background:var(--card);border-radius:12px;padding:0 16px;border-left:3px solid #b6bcc8}
+  .flow-out .fo-pct{font-family:var(--display);font-weight:600;font-size:15px;min-width:46px;font-variant-numeric:tabular-nums}
+  .flow-out .fo-l{font-size:13px;color:var(--ink)}
+
+  /* categories flowchart — same component as the outcomes flow */
+  .catflow{display:flex;align-items:center;margin-top:4px}
+  .cf-links{flex:0 0 auto;align-self:center;display:block}
+  .cf-cards{flex:1 1 auto;display:flex;flex-direction:column;gap:12px}
+  .cf-card{border-top:0!important;background:var(--card);border-radius:12px;padding:14px 16px;align-items:center;border-left:3px solid var(--accent)}
+  .cf-pct{font-family:var(--display);font-weight:600;font-size:15px;color:var(--accent);min-width:60px;font-variant-numeric:tabular-nums}
+
+  /* context-card header: category stacked above title */
+  .dh-title{display:flex;flex-direction:column;gap:7px;align-items:flex-start;min-width:0}
+
+  /* enriched context card (clinical-trial steps) */
+  .detail code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:5px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+  .dbul{margin:13px 0 0;padding:0;list-style:none}
+  .dbul li{position:relative;padding-left:17px;font-size:13.5px;color:#3a4256;line-height:1.55;margin:7px 0;max-width:88ch}
+  .dbul li:before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+  .dbranch{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+  .dchip{display:inline-flex;align-items:center;font-family:var(--display);font-weight:500;font-size:12px;background:var(--card);border-radius:999px;padding:7px 13px;color:var(--ink)}
+  .dchip:before{content:"→";color:var(--ink-3);margin-right:7px;font-weight:600}
+  .dloop{margin-top:13px;font-size:12.5px;color:var(--accent);display:flex;gap:8px;align-items:baseline;line-height:1.5;max-width:86ch;font-weight:500}
+  .dmeta{margin-top:14px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+  .dmeta b{font-family:var(--display);font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-size:10px;margin-right:9px}
+
+  /* non-selectable terminal cards */
+  .node.static{opacity:.5;cursor:default;border:1px dashed #ccd1db;background:#f5f6f8}
+  .node.static:hover{opacity:.5;background:#f5f6f8}
+
+  /* branch ghost nodes on the canvas (shown when a decision step is selected) */
+  .ghost{position:absolute;z-index:3;display:flex;align-items:center;justify-content:center;height:38px;
+    background:#f5f6f8;border:1px dashed #ccd1db;border-radius:10px;color:var(--ink-3);
+    font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.01em;pointer-events:none;
+    animation:ghostin .28s cubic-bezier(.4,0,.2,1)}
+  @keyframes ghostin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -111,72 +219,277 @@
   <div class="detail" id="detail"></div>
 
 <script>
-const COLORS={engine:"#0F5BFF",careteam:"#0f8a7e",patient:"#c06a2e",payer:"#7c53c9",system:"#7b8296"};
-const CATNAME={engine:"RISA engine",careteam:"Care team",patient:"Patient",payer:"Payer",system:"System of record"};
-const EMR_ICON=`<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>`;
+const COLORS={engine:"#0F5BFF",careteam:"#0f8a7e",patient:"#c06a2e",payer:"#7c53c9",system:"#0F5BFF",risa:"#0F5BFF",prov:"#c06a2e",pat:"#7c53c9",hitl:"#CA8A04"};
+const CATNAME={engine:"RISA engine",careteam:"Care team",patient:"Patient",payer:"Payer",system:"System of record",risa:"RISA",prov:"Provider-side",pat:"Patient-side",hitl:"Human in the loop (provider side)"};
+const ONCO_MARK=`<svg width="30" height="26" viewBox="0 0 40 34" fill="none"><defs><linearGradient id="ol" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6a4bea"/><stop offset="1" stop-color="#4657d6"/></linearGradient></defs><path d="M8 2 L22 2 L16 20 L2 20 Z" fill="url(#ol)"/><path d="M20 12 L34 12 L28 32 L14 32 Z" fill="#2f86ff"/></svg>`;
+const HELP=`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const CHEV=`<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+const PIE=["#0F5BFF","#2f6dff","#4f80ff","#6c93ff","#88a6ff","#a3b8ff","#bfcbf6","#cdd6ec","#dae0ee","#e6e9f1","#eff1f6"];
 
 function n(id,col,row,cat,t,desc,ex,pct,count){return {id,col,row,cat,t,desc,ex,pct,count};}
 
 const FUNNELS={
  ct:{
-  title:"Clinical Trial Patient Matching Funnel", sub:"Charts read from the EMR, matched to a protocol, results written back",
-  unit:"matches", denom:"of MRNs", exlabel:"Example, BNT327-06", showDrop:true, legend:["engine","careteam","patient"],
+  title:"Clinical Trial Patient Matching Funnel", sub:"Patient charts read from the EMR, matched to a protocol, patients enrolled into clinical trials",
+  exlabel:"Example", legend:["risa","prov","pat"],
   nodes:[
-   n("emr",0,0,"system","EMR","The practice EMR is the system of record. Charts are read from it over a live FHIR feed, and enrollment status is written back into it.","Charts stream in through the FHIR connection; the match and enrollment status post back to the patient record."),
-   n("mrns",1,0,"engine","MRNs screened","Every unique patient chart on the practice EMR enters the funnel. Coverage is 100 percent by design; no chart is pre-filtered before matching.","The feed exposes <code>Condition</code>, <code>Observation</code>, <code>MedicationRequest</code> and <code>Procedure</code> for every MRN.",100,100000),
-   n("dx",2,0,"engine","Diagnosis match confirmed","The engine confirms the patient's diagnosis aligns with the trial indication. Charts that do not match the target indication drop out here.","Atom <code>I4a</code> checks for histologically confirmed NSCLC using <code>Condition</code> ICD-10 C34.x and the pathology histology.",22,22000),
-   n("chunks",3,0,"engine","Independently evaluable chunks matched against patient records","The protocol's criteria are broken into independently evaluable chunks, and each chunk is matched against the patient record on its own.","The organ-function criterion <code>I7</code> alone becomes 14 atoms, from <code>I7a</code> ANC to <code>I7m</code> aPTT, each with its own LOINC code.",20,20000),
-   n("missing",4,0,"careteam","Missing information flagged for CRC action","Chunks that cannot be resolved from the chart are flagged for the CRC to obtain, rather than scored as a fail. 112 of the 158 atoms route to review when their data is absent.","Atom <code>I2e</code>, documented PD-L1 (22C3) status, is usually only in a scanned report, so it is flagged for the CRC to obtain.",16,16000),
-   n("stale",5,0,"careteam","Stale information flagged for re-run of reports","Values resolved against data past their validity window are flagged so the reports are re-run against current results. 62 atoms carry a staleness window.","Atom <code>I6a</code> ECOG is valid within 14 days and atom <code>I7a</code> ANC within 28 days; stale values trigger a re-run.",15,15000),
-   n("mincrit",6,0,"engine","Patient crosses minimum requirement criteria for screening","With the gaps closed, the engine confirms the patient clears the minimum required criteria. Every hard stop must pass and no exclusion may fire, which is where most of the cohort falls out.","78 hard stops apply, including <code>I3a</code> age ≥18, the <code>I4-STAGE</code> anyOf gate, <code>E4a</code> no prior platinum, and <code>E4b</code> no prior PD-(L)1.",4.5,4500),
-   n("surf",7,0,"careteam","CRC team surfaces patient to provider","The CRC packages the qualifying match with its per-atom evidence trail and surfaces it to the treating provider for review.","The package lists every passing atom and its FHIR source so the provider can verify the match at a glance.",4.0,4000),
-   n("prev",8,0,"careteam","Provider reviewed","The provider applies clinical judgment the record cannot capture, weighing context around the automated match.","Tier 4 atoms such as <code>I4e</code> and <code>I4f</code> (tumor not amenable to curative surgery or radiotherapy) call for provider judgment.",3.6,3600),
-   n("valid",9,0,"careteam","Validated as good match","The provider confirms the candidate is a genuine fit for the protocol before any patient contact.","The provider confirms fit; borderline cases are set aside for a better fitting trial.",2.2,2200),
-   n("acted",10,0,"careteam","Provider acted on","The provider places the trial referral, moving the candidate from decision to action.","The referral is entered and Substudy A or B is assigned from histology atom <code>I4g</code>.",2.0,2000),
-   n("appr",11,0,"patient","Patient approached","The care team approaches the patient about the trial and opens the consent conversation.","A nurse navigator introduces the trial at the next scheduled visit.",1.8,1800),
-   n("int",12,0,"patient","Patient interested","The patient indicates willingness to proceed toward consent.","The patient asks to review the consent form and schedule screening.",1.2,1200),
-   n("cons",13,0,"patient","Patient consented","The patient signs the informed consent form and formal protocol screening can begin.","Consent atoms <code>I1a</code> (capacity) and <code>I1b</code> (documented written consent per ICH GCP) are satisfied.",1.0,1000),
-   n("scr",14,0,"patient","Patient screened","The formal screening visit confirms the protocol requirements that need in-person assessment.","Screening confirms <code>I5a</code> (measurable lesion per RECIST 1.1), <code>E10i</code> (LVEF ≥50%), and <code>E10m</code> (QTcF ≤480 ms).",0.8,800),
-   n("enr",15,0,"patient","Patient enrolled","The patient is enrolled and on study. The enrollment status is written back into the EMR.","The patient is registered to the protocol and begins treatment; the record updates automatically.",0.6,600),
+   {id:"emr",col:0,row:0,cat:"system",tag:"System of record",t:"OncoEMR",
+    desc:"The site's EMR and system of record. RISA reads charts over a live HL7 FHIR R4 connection (via Flatiron) and writes match and enrollment status back.",
+    bullets:["In reach: <code>Patient</code>, <code>Condition</code> (ICD-10), <code>Observation</code> (LOINC), <code>MedicationRequest</code> (RxNorm), <code>Procedure</code>, <code>DiagnosticReport</code>, <code>AllergyIntolerance</code>, <code>Immunization</code>, <code>AdverseEvent</code>."],
+    ex:"Charts stream in through the HL7 FHIR connection; the match and enrollment status post back to the patient record."},
+   {id:"mrns",col:1,row:0,cat:"risa",tag:"RISA automated",t:"MRNs screened",
+    desc:"Batches of patient MRNs on the EMR enter the funnel.",
+    bullets:["Fired by five triggers: new-trial clock (score the whole pool once), amendment clock (re-score the matched cohort), patient clock (new document or HL7 FHIR delta every 1 to 2 days), time and calendar clock (a window lapses), and manual or referral entry.","A one-time go-live backfill scores every existing patient against every active trial.","A broad pre-filter on primary <code>Condition</code> or ICD, age and sex narrows the trial book to the 2 to 3 plausible trials."],
+    source:"Trigger: trial activation, patient document or HL7 FHIR delta, scheduler, manual referral, or go-live backfill.",
+    ex:"A new NSCLC patient: <code>Condition</code> C34.x narrows the book to lung trials before deeper evaluation."},
+   {id:"dx",col:2,row:0,cat:"risa",tag:"RISA decision",t:"Diagnosis match confirmed",
+    desc:"The cheapest T1 gate. Does the patient's indication match the trial? Non-matching charts drop here.",
+    bullets:["Basis: <code>Condition</code> ICD-10 (for example NSCLC C34.x) plus histology."],
+    branches:["Match: continue","No match (for example wrong histology): Closed"],
+    fork:{pass:"Match",alts:[{label:"No match",term:"Closed"}]},
+    source:"Trigger: T1 pre-filter on Condition and histology.",
+    ex:"Histologically confirmed NSCLC (C34.x) passes; a non-NSCLC chart drops out."},
+   {id:"chunks",col:3,row:0,cat:"risa",tag:"RISA automated",t:"Independently evaluable chunks matched against patient records",
+    desc:"Each criterion is broken into atoms, one independently evaluable fact each, and every atom is matched against the record.",
+    bullets:["AND and OR logic is captured; each atom is pass-if-true (inclusion) or pass-if-false (exclusion).","Atoms are tiered T1 (HL7 FHIR-deterministic), T2 (HL7 FHIR plus confidence), T3 (CRC action) and T4 (PI judgment), mapped to LOINC, ICD-10, RxNorm and SNOMED, with hard-stop flags and time windows.","Evaluation runs a cascade from T1 to T4 under a 3-layer confidence model: recency gate, data confidence, risk-calibrated auto-pass bar."],
+    source:"Trigger: atom decomposition plus the cascade over the atom set, querying HL7 FHIR.",
+    ex:"BNT327-06: 37 criteria become 88 atoms. Organ function <code>I-07</code> alone is an AND-list of 10 atoms."},
+   {id:"missing",col:4,row:1,cat:"risa",tag:"RISA automated",t:"Missing information flagged for CRC action",
+    desc:"Atoms that cannot be resolved from the chart are flagged for the CRC to obtain, not scored as a fail.",
+    bullets:["A Layer 2B completeness gap routes to <code>DOCUMENT_COLLECT</code> or <code>ORDER_LAB</code>."],
+    loop:"When the CRC collects the data, the new HL7 FHIR data re-enters the engine and the atom re-scores.",
+    source:"Trigger: an atom with missing data (Layer 2B).",
+    ex:"An outside PD-L1 (22C3) report is requested, then re-scores <code>I-02</code>."},
+   {id:"stale",col:5,row:1,cat:"risa",tag:"RISA automated",t:"Stale information flagged for re-run of reports",
+    desc:"Values older than their validity window fail the Layer 1 recency gate and are flagged so the reading is refreshed.",
+    bullets:["Driven by the time and calendar clock: a once-passing lab that lapses triggers <code>ORDER_LAB</code>."],
+    loop:"The refreshed result re-enters the engine and re-scores.",
+    source:"Trigger: a freshness window lapses (scheduler).",
+    ex:"A 29-day-old ANC against a 28-day window is re-ordered."},
+   {id:"mincrit",col:6,row:0,cat:"risa",tag:"RISA decision",t:"Patient crosses minimum requirement criteria for screening",
+    desc:"The verdict. Every hard-stop atom must pass and no exclusion may fire.",
+    bullets:["LIKELY_ELIGIBLE: clean pass, no open actions.","POTENTIALLY_ELIGIBLE: hard stops pass but open T3 or T4 data or actions remain.","NOT_ELIGIBLE: a hard-stop fails."],
+    branches:["LIKELY or POTENTIALLY: surface","NOT_ELIGIBLE mutable: Deferred","NOT_ELIGIBLE: Closed"],
+    fork:{pass:"LIKELY / POTENTIALLY",alts:[{label:"Non-eligible mutable",term:"Deferred"},{label:"Not eligible",term:"Closed"}]},
+    source:"Trigger: aggregated atom results, hard-stop gating plus count of open actions.",
+    ex:"All atoms pass, none pending: LIKELY. A failed <code>E-04</code> prior-platinum hard stop: NOT_ELIGIBLE."},
+   {id:"surf",col:7,row:0,cat:"prov",tag:"Provider-side action",t:"CRC team surfaces patient to provider",
+    desc:"The CRC consolidates the candidate on the per-trial watchlist, ranked by confidence and fit, and packages the per-atom evidence trail for the treating provider.",
+    bullets:["POTENTIALLY candidates carry their open-action package, hard-stop atoms first."],
+    source:"Trigger: verdict written to the per-trial watchlist with a rank.",
+    ex:"The package lists each passing atom and its HL7 FHIR source so the provider can verify at a glance."},
+   {id:"prev",col:8,row:0,cat:"prov",tag:"Provider-side action",t:"Provider reviewed",
+    desc:"The investigator applies clinical judgment the record cannot capture, resolving T4 judgment atoms.",
+    source:"Trigger: PI review action in RISA.",
+    ex:"Tumor not amenable to curative surgery or radiotherapy calls for provider judgment."},
+   {id:"valid",col:9,row:0,cat:"prov",tag:"Provider-side decision",t:"Validated as good match",
+    desc:"The PI gives the overall yes or no on taking the patient, before any outreach, so the team never approaches someone the PI would decline.",
+    branches:["Confirm: act","Decline: reason recorded"],
+    fork:{pass:"Confirm",alts:[{label:"Decline",term:"Reason recorded"}]},
+    source:"Trigger: PI eligibility confirmation.",
+    ex:"A borderline organ-function candidate is confirmed appropriate, or set aside for a better-fitting trial."},
+   {id:"acted",col:10,row:0,cat:"prov",tag:"Provider-side action",t:"Provider acted on",
+    desc:"The PI places the trial referral and the correct substudy or arm is assigned.",
+    source:"Trigger: referral entered in RISA.",
+    ex:"Substudy A (non-squamous) or B (squamous) is assigned from histology."},
+   {id:"appr",col:11,row:0,cat:"prov",tag:"Provider-side action",t:"Patient approached",
+    desc:"The coordinator contacts the patient, explains the trial, and opens the consent conversation.",
+    source:"Trigger: CRC outreach.",
+    ex:"A nurse navigator introduces the trial at the next scheduled visit."},
+   {id:"int",col:12,row:0,cat:"pat",tag:"Patient-side decision",t:"Patient interested",
+    desc:"The patient indicates willingness to proceed toward consent.",
+    branches:["Interested: continue","Declines: reason recorded"],
+    fork:{pass:"Interested",alts:[{label:"Declines",term:"Reason recorded"}]},
+    source:"Trigger: patient response during outreach.",
+    ex:"The patient asks to review the consent form and schedule screening."},
+   {id:"cons",col:13,row:0,cat:"pat",tag:"Patient-side action",t:"Patient consented",
+    desc:"Informed consent is signed, the real-world satisfaction of the <code>I-01</code> consent atom. Formal protocol screening can begin.",
+    source:"Trigger: signed ICF documented in the EMR.",
+    ex:"Consent captures capacity and documented written consent per ICH GCP."},
+   {id:"scr",col:14,row:0,cat:"prov",tag:"Provider-side decision",t:"Patient screened",
+    desc:"The protocol-defined eligibility confirmation per the Schedule of Activities, largely confirming what the engine already believed, now under protocol conditions and timing.",
+    branches:["Pass: enroll","Screen-fail mutable: Deferred","Screen-fail: Closed"],
+    fork:{pass:"Pass",alts:[{label:"Screen-fail (mutable)",term:"Deferred"},{label:"Screen-fail",term:"Closed"}]},
+    source:"Trigger: screening assessments recorded in EMR or EDC.",
+    ex:"Screening labs and imaging are drawn within the protocol window for the official determination."},
+   {id:"enr",col:15,row:0,cat:"prov",tag:"Provider-side action",t:"Patient enrolled",
+    desc:"The patient is enrolled and randomized to the correct substudy or arm, and a slot is consumed.",
+    bullets:["Match, actions and final status reconcile back into EMR, CTMS and eTMF.","The outcome feeds back as signal to improve matching."],
+    source:"Trigger: enrollment and randomization recorded in CTMS.",
+    ex:"Enrolls in Substudy A and is randomized; the Substudy-A slot count drops by one."},
   ],
   edges:[
-   ["emr","mrns","main"],["mrns","dx","main"],["dx","chunks","main"],["chunks","missing","main"],["missing","stale","main"],
-   ["stale","mincrit","main"],["mincrit","surf","main"],["surf","prev","main"],["prev","valid","main"],["valid","acted","main"],
+   ["emr","mrns","main"],["mrns","dx","main"],["dx","chunks","main"],["chunks","mincrit","main"],
+   ["chunks","missing","sub"],["missing","stale","sub"],["stale","mincrit","sub"],
+   ["mincrit","surf","main"],["surf","prev","main"],["prev","valid","main"],["valid","acted","main"],
    ["acted","appr","main"],["appr","int","main"],["int","cons","main"],["cons","scr","main"],["scr","enr","main"],["enr","emr","return"],
   ]},
 
  pa:{
   title:"Prior Authorization Funnel", sub:"Orders read from the EMR, routed and filed, the result written back",
-  unit:"cases", denom:"of orders", exlabel:"Example", showDrop:false, legend:["engine","payer"],
+  exlabel:"Example", legend:["risa","hitl"],
   nodes:[
-   n("emr",0,0,"system","EMR","The practice EMR is the system of record. Orders are read from it, and the finished authorization is written back into it.","Orders are read as they post; the approved authorization number and dates are written back onto the order."),
-   n("ingest",1,0,"engine","Orders ingested","Every medication and treatment order at the practice enters the queue, read straight from the EMR.","A new infusion order posts and is picked up within minutes, with no staff re-keying.",100,100000),
-   n("check",2,0,"engine","Auth requirement check","The engine checks payer, plan, and drug against current policy, then routes the order to one of three outcomes.","The engine reads the plan and J-code to decide whether an authorization is needed.",100,100000),
-   n("noauth",3,-1,"engine","No auth required","The plan does not require an authorization for this order, so it clears with no filing and no delay to the patient.","A drug on the plan's no-authorization list clears the same day.",33,33000),
-   n("onfile",3,0,"engine","Auth on file","A valid authorization already covers this drug and patient, so the order clears against it.","An authorization from a prior treatment cycle still applies.",22,22000),
-   n("authreq",3,1,"engine","Auth required","A new authorization is needed. The order enters the filing path, which RISA runs on Autopilot.","A first-cycle regimen with no existing authorization needs a fresh submission.",45,45000),
-   n("mednec",4,0,"engine","Medical necessity check","Every routed order is checked for medical necessity against payer policy and clinical guidelines. No-auth and auth-on-file cases resolve here; auth-required cases proceed to filing.","Diagnosis, staging, and prior therapy are checked against the policy's necessity criteria.",100,100000),
-   n("query",5,-1.25,"engine","Raise query","If the necessity check finds missing information, RISA raises a query to close the gap before filing. This is a sub-branch off the main spine.","A missing pathology result triggers a query to the ordering provider."),
-   n("queryok",6,-1.25,"engine","Query approved","The query is resolved and the order returns to the filing path with a complete record.","The provider supplies the result and the order proceeds to filing."),
-   n("portal",5,0,"engine","Payer portal form filling","RISA fills the payer's portal form with the order and clinical details.","The payer's web form is populated automatically from the record.",45,45000),
-   n("docs",6,0,"engine","Clinical documentation attachment","Supporting clinical documentation is attached to the submission.","Chart notes, pathology, and prior therapy records are attached.",45,45000),
-   n("quest",7,0,"engine","Clinical questionnaire filling","Payer-specific clinical questionnaires are completed from the record.","The plan's oncology questionnaire is answered from structured data.",45,45000),
-   n("submit",8,0,"engine","Submission","The completed authorization request is submitted to the payer.","The packet is transmitted through the payer's channel.",45,45000),
-   n("status",9,0,"payer","Status tracking","RISA tracks the request to a decision. First-submission approval exceeds 97 percent, against an industry benchmark near 81 percent.","The case is monitored until the payer returns a determination.",43.7,43700),
-   n("wb",10,0,"engine","Write back to EMR","The authorization number and validity dates are written back into the EMR, ready for scheduling with no re-keying.","The result posts onto the order, ready for the treatment date.",43.7,43700),
+   n("emr",0,0,"system","OncoEMR","The practice EMR is the system of record. Orders are read from it, and the finished authorization or necessity result is written back into it.",""),
+   n("ingest",1,0,"risa","Orders ingested","Every medication and treatment order at the practice enters the queue, read straight from the EMR.",""),
+   n("elig",2,0,"risa","Eligibility and benefit verification","Before routing, RISA verifies the patient's coverage is active and checks the plan's benefits for the ordered drug.",""),
+   n("check",3,0,"risa","Auth requirement check","The engine checks payer, plan, and drug against current policy, then routes the order to one of three outcomes.",""),
+   n("noauth",4.5,-1.85,"risa","No auth required (NAR)","The plan does not require an authorization for this order, so it clears with no filing and no delay to the patient.",""),
+   n("onfile",4.5,-0.9,"risa","Auth on file","A valid authorization already covers this drug and patient, so the order clears against it.",""),
+   n("authreq",4.5,0,"risa","Auth required","A new authorization is needed. The order enters the filing path, which RISA runs on Autopilot.",""),
+   n("mednec",6,0,"risa","Medical necessity check","Every routed order is checked for medical necessity against payer policy and clinical guidelines. No-auth and auth-on-file cases are documented back to the EMR; auth-required cases proceed to filing.",""),
+   n("docwb",7,-1.15,"risa","Medical necessity requirements checked and reported, even if prior auth is not required, to avoid claims denials","For no-auth and auth-on-file cases, RISA still checks and reports medical necessity to the EMR, so later claims are not denied.",""),
+   n("query",7,1.35,"risa","Query raised","If the necessity check finds missing information, RISA raises a query to close the gap before filing.",""),
+   n("qaccept",8,0.75,"hitl","Query accepted","The query is accepted and the missing information is supplied by the provider.",""),
+   n("qnochange",8,1.95,"risa","No changes made","The query returns nothing new, so the order proceeds on the existing record.",""),
+   n("rework",9,0.75,"risa","Authorization reworked","With the new information the authorization request is reworked, then continues to filing.",""),
+   n("portal",10,0,"risa","Payer portal form filling","RISA fills the payer's portal form with the order and clinical details.",""),
+   n("docs",11,0,"risa","Clinical documentation attachment","Supporting clinical documentation is attached to the submission.",""),
+   n("quest",12,0,"risa","Clinical questionnaire filling","Payer-specific clinical questionnaires are completed from the record.",""),
+   n("submit",13,0,"risa","Auditable submission package ready","All order, clinical, and questionnaire data are bundled into a complete, auditable package, ready for review and submission.",""),
+   n("rev",14,0,"hitl","Review and Submit","A person reviews the assembled package, then submits it to the payer through the payer portal.",""),
+   n("status",15,0,"risa","Status tracking","RISA tracks the request to a decision. First-submission approval exceeds 97 percent, against an industry benchmark near 81 percent.",""),
+   n("wb",16,0,"risa","Write back Status to EMR","The authorization number and validity dates are written back into the EMR, ready for scheduling with no re-keying.",""),
   ],
+  groups:[{label:"payer portal",from:"portal",to:"submit"}],
   edges:[
    ["emr","ingest","main"],["ingest","check","main"],
    ["check","noauth","branch"],["check","onfile","branch"],["check","authreq","branch"],
    ["noauth","mednec","converge"],["onfile","mednec","converge"],["authreq","mednec","converge"],
-   ["mednec","portal","main"],
-   ["mednec","query","sub"],["query","queryok","sub"],["queryok","portal","sub"],
-   ["portal","docs","main"],["docs","quest","main"],["quest","submit","main"],["submit","status","main"],["status","wb","main"],
-   ["wb","emr","return"],
+   ["mednec","docwb","sub","NAR / Auth on file"],
+   ["mednec","portal","main","Medical necessity criteria met"],
+   ["mednec","query","sub","Missing info / Medical necessity criteria not met"],
+   ["query","qaccept","sub"],["query","qnochange","sub"],
+   ["qaccept","rework","sub"],["rework","portal","join"],["qnochange","portal","join"],
+   ["portal","docs","main"],["docs","quest","main"],["quest","submit","main"],["submit","rev","main"],["rev","status","main"],["status","wb","main"],
+   ["wb","emr","return","authorization written back"],
   ]},
 };
 
-const W=196, EMRW=88, PITCH=246, X0=40, ROWGAP=118;
+/* Rich detail shared by the query-outcome steps */
+const QUERY_PANEL={
+  queriesPct:70,
+  outcomes:[
+    {label:"Approved via change / rework",pct:61,tone:"pos"},
+    {label:"Approved directly",pct:21,tone:"pos"},
+    {label:"In progress",pct:17,tone:"neutral"},
+    {label:"Denied",pct:0.7,tone:"neg"},
+  ],
+  buckets:[
+    {pct:"40%",name:"Not a preferred drug / step therapy not followed",
+     def:"The most common denial trigger; the payer requires a different drug or a prior therapy first.",
+     rtitle:"Preferred drug & step-therapy compliance",
+     lead:"RISA validates payer coverage before the request is filed.",
+     bullets:["Checks payer formulary requirements","Identifies non-preferred therapies","Verifies step-therapy completion","Recommends covered alternatives before submission"]},
+    {pct:"25–30%",name:"Missing or incomplete clinical documentation",
+     def:"Unsigned MD notes, labs not updated in the EMR, or outdated documentation (recent lab reports missing) that doesn't meet payer requirements.",
+     rtitle:"Clinical documentation completion",
+     lead:"RISA reviews the record for the gaps a payer will flag.",
+     bullets:["Reviews physician notes, pathology, and imaging","Checks laboratory results and supporting documentation","Identifies missing, outdated, or incomplete records the payer requires"]},
+    {pct:"10–15%",name:"Medical necessity not met",
+     def:"Clinical documentation exists but doesn't align with payer or guideline criteria.",
+     rtitle:"Medical necessity validation",
+     lead:"RISA validates the case against payer and guideline criteria.",
+     bullets:["Confirms diagnosis, treatment intent, and prior therapies","Checks biomarkers and clinical criteria","Aligns to payer policies and NCCN guidelines before submission"]},
+    {pct:"7%",name:"Treatment protocol mismatch",
+     def:"Drug frequency doesn't match the payer mandate, biosimilar substitution required, or other protocol-level issues.",
+     rtitle:"Treatment protocol alignment",
+     lead:"RISA verifies the regimen matches the payer's protocol.",
+     bullets:["Checks regimen, dosage, frequency, cycles, and units","Confirms biosimilar requirements","Applies other payer-specific protocols for submission accuracy"]},
+    {pct:"13–15%",name:"Others",
+     def:"Out-of-network provider, insurance coverage gaps, or multi-reason cases.",
+     rtitle:"Administrative & eligibility checks",
+     lead:"RISA confirms the administrative basics that trigger avoidable denials.",
+     bullets:["Confirms eligibility and diagnosis coding","Checks prior-authorization history and network participation","Applies payer-specific administrative requirements"]},
+  ],
+  granular:[
+    {label:"Non-preferred drug",pct:36.9},
+    {label:"Insurance issue",pct:19.7},
+    {label:"DX code missing",pct:14.6},
+    {label:"Medical necessity criteria not met",pct:13.0},
+    {label:"Clinicals missing",pct:7.9},
+    {label:"Provider issue",pct:3.1},
+    {label:"Step therapy not followed",pct:1.7},
+    {label:"Treatment planning issue",pct:1.5},
+    {label:"Outside location / home infusion",pct:1.1},
+    {label:"Dosage issue",pct:0.3},
+    {label:"Other",pct:0.2},
+  ],
+};
+["query","qaccept"].forEach(id=>{const nd=FUNNELS.pa.nodes.find(n=>n.id===id); if(nd) Object.assign(nd,QUERY_PANEL);});
+["docwb","qnochange"].forEach(id=>{const nd=FUNNELS.pa.nodes.find(n=>n.id===id); if(nd) nd.noselect=true;});
+
+/* Full copy for the selectable Prior Authorization steps (context: RISA architecture) */
+const PA_COPY={
+ emr:{srclabel:"Data & exchange",
+   desc:"The EMR is the system of record. RISA reads the patient and order data it needs and reports every finding back, so the chart and the authorization always agree.",
+   bullets:["Reads demographics, provider and physician notes, coverage and coordination of benefits.","Reads insurance cards, prior authorization letters, diagnoses, documents, medications, visits and appointments.","Writes the authorization number, validity dates and necessity findings back onto the order."],
+   source:"HL7 FHIR R4 for reads and writes; a bot writes back wherever a payer or field has no HL7 FHIR path."},
+ ingest:{srclabel:"Data & exchange",
+   desc:"Based on the practice's preference, orders are ingested from the EMR, and RISA pulls the structured and unstructured data the case will need.",
+   bullets:["Structured data: demographics, coverage, coordination of benefits, diagnoses, medications, visits and appointments.","Unstructured data: physician notes, prior authorization letters, insurance cards and scanned documents.","Intake follows the practice's preference for how and when orders are pulled."],
+   source:"HL7 FHIR R4 resources: Patient, Coverage, Practitioner, Condition, MedicationRequest, DocumentReference, Encounter."},
+ elig:{srclabel:"Data & exchange",
+   desc:"Before anything is routed, RISA checks and validates that coverage is active and the benefits fit the ordered drug.",
+   bullets:["Confirms coverage validity and plan term dates.","Checks deductibles, co-pays, coinsurance and formulary details.","Surfaces the patient's financial responsibility across their insurance plans."],
+   source:"Payer eligibility via X12 270/271 EDI, or custom JSON and portals where a payer has no EDI; pharmacy benefit via NCPDP SCRIPT against the PBM and formulary."},
+ check:{srclabel:"Data & exchange",
+   desc:"RISA decides whether a prior authorization is actually required for this order, then routes it to the right path.",
+   bullets:["Reads the plan and CPT / J-code against current authorization grids and payer policy.","Checks prior authorization letters and coverage rules to confirm what is already on file.","Routes each order to one of three outcomes: no auth required, auth on file, or auth required."],
+   source:"Authorization (NAR) grids, payer portals and X12 278/278i inquiries; grids kept current by the Authorization Grids bots."},
+ noauth:{srclabel:"Data & exchange",
+   desc:"The plan does not require an authorization for this order, so it clears with no filing and no delay to the patient.",
+   bullets:["Confirmed against the plan's no-authorization rules and the latest NAR grids.","The finding is reported straight back to the EMR."],
+   source:"NAR grids maintained by the Authorization Grids bots; finding written back via HL7 FHIR or bot."},
+ onfile:{srclabel:"Data & exchange",
+   desc:"A valid authorization already covers this drug and patient, so the order clears against it.",
+   bullets:["Matched to an existing authorization from a prior cycle that still applies.","The finding is reported back to the EMR, ready for scheduling."],
+   source:"Existing authorization letters and X12 278 status; finding written back via HL7 FHIR or bot."},
+ authreq:{srclabel:"Data & exchange",
+   desc:"A new authorization is needed, so the order enters the filing path that RISA runs on Autopilot.",
+   bullets:["No existing authorization covers the order; a fresh submission is required.","The structured chart data carries forward into medical necessity and filing."],
+   source:"Routing decision from payer policy and CPT / J-code; filing runs over payer portals, X12 278 and the automated fax engine."},
+ mednec:{srclabel:"Data & exchange",
+   desc:"RISA establishes medical necessity by validating the case against current payer and clinical guidelines, building a defensible rationale before anything is filed.",
+   bullets:["Gathers the right policies and guidelines from the payer, NCCN, CMS and FDA.","Cross-checks the regimen against the compendia (for example the NCCN Drugs & Biologics Compendium) for supported use and coding.","Validates it all across the patient chart for accurate coding and the right care path, which prevents avoidable denials and supports denial management."],
+   source:"Physician notes and chart data via HL7 FHIR; payer medical policy, NCCN / CMS / FDA guidance and compendia references for documentation."},
+ rework:{srclabel:"Data & exchange",
+   desc:"With the newly supplied information, RISA reworks the authorization request and carries it forward to filing.",
+   bullets:["Folds in the documentation and coding the query returned.","Re-validates against payer policy and compendia, then rejoins the filing path with a complete, payer-ready case."],
+   source:"Updated chart data via HL7 FHIR; reworked package re-checked against payer policy and compendia."},
+ portal:{srclabel:"Data & exchange",
+   desc:"RISA picks the right payer form and fills it with the order and clinical details, automatically.",
+   bullets:["The correct form is chosen for the payer and plan.","Fields are populated from the patient records that were ingested, with no manual entry."],
+   source:"Payer portals and X12 278/278i; the Authorization Grids bots supply the current form per payer and plan."},
+ docs:{srclabel:"Data & exchange",
+   desc:"RISA attaches the supporting clinical documentation each payer requires.",
+   bullets:["Chart notes, pathology, imaging and prior-therapy records are attached.","Each attachment is matched to the medical-necessity criteria and compendia support for the case."],
+   source:"DocumentReference and DiagnosticReport via HL7 FHIR; attached through the portal or the automated fax engine."},
+ quest:{srclabel:"Data & exchange",
+   desc:"RISA answers the plan's clinical questionnaire and ties every answer back to the documentation that is attached.",
+   bullets:["Each answer references the specific clinical documentation attached to the submission.","RISA highlights the supporting statements in the document that back each answer.","It also flags any statement that contradicts an answer, so the reviewer can catch it at a glance."],
+   source:"Payer questionnaire templates from the Submission bots; each answer linked to the attached HL7 FHIR DocumentReference."},
+ submit:{srclabel:"Data & exchange",
+   desc:"Everything is bundled into a complete, auditable package, ready for a person to review and submit.",
+   bullets:["Accurate coding, dosages and units are included per the plan's rules.","RISA decides which CPT codes go through which portals.","Every field, citation and attachment is logged with its source for a full audit trail."],
+   source:"Assembled from HL7 FHIR chart data, compendia citations and payer templates; routed per payer to portal, X12 278 or fax."},
+ rev:{srclabel:"Data & exchange",
+   desc:"A person reviews the assembled package and submits it to the payer. This is the human-in-the-loop checkpoint before anything leaves the practice.",
+   bullets:["The reviewer confirms coding, documentation and compendia-backed necessity are right.","On approval, the package is sent through the payer's portal, X12 278, or the automated fax engine."],
+   source:"Human review in RISA; submission over payer portals, X12 278/278i or the automated fax engine."},
+ status:{srclabel:"Data & exchange",
+   desc:"RISA tracks each request to a decision, checking status across payer portals until adjudication is made.",
+   bullets:["Status Inquiry bots poll the relevant portals consistently and autonomously until a determination returns.","First-submission approval exceeds 97 percent, against an industry benchmark near 81 percent."],
+   source:"Status Inquiry bots across payer portals and X12 278 status responses."},
+ wb:{srclabel:"Data & exchange",
+   desc:"The authorization number and validity dates are written back into the EMR, ready for scheduling with no re-keying.",
+   bullets:["The result posts onto the order via HL7 FHIR or bot.","The chart is ready for scheduling the moment the authorization posts."],
+   source:"HL7 FHIR R4 write-back; a bot updates the EMR wherever no HL7 FHIR path exists."},
+};
+Object.entries(PA_COPY).forEach(([id,o])=>{const nd=FUNNELS.pa.nodes.find(n=>n.id===id); if(nd) Object.assign(nd,o);});
+{const qa=FUNNELS.pa.nodes.find(n=>n.id==="qaccept"); if(qa) qa.sub="70%+ of queries accepted";}
+let QV={view:"outcomes",detailed:true};
+
+const W=196, EMRW=168, PITCH=246, X0=40, ROWGAP=118;
 const canvas=document.getElementById("canvas"), bg=document.getElementById("bg"), scroll=document.getElementById("scroll");
 const NS="http://www.w3.org/2000/svg";
 function E(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
@@ -206,14 +519,15 @@ function buildNodes(){
     const d=document.createElement("div");
     if(nd.cat==="system"){
       d.className="node system"; d.style.width=EMRW+"px";
-      d.innerHTML=`<div class="emr-icon">${EMR_ICON}</div><div class="emr-label">EMR</div>`;
+      d.innerHTML=`<div class="emr-logo"><span class="emr-mark">${ONCO_MARK}</span><span class="emr-word"><b>ONCO</b><span class="e2">EMR</span><sup>®</sup></span></div>`;
     } else {
-      d.className="node"; d.style.width=W+"px";
-      const foot = nd.pct!=null?`<div class="foot"><span class="mn">${fmtNum(nd.count)}</span> ${A.unit} <span class="pct">${fmtPct(nd.pct)}</span></div>`:"";
-      d.innerHTML=`<div class="tag" style="color:${c}"><span class="dot" style="background:${c}"></span>${CATNAME[nd.cat]}</div>
-        <div class="nt">${nd.t}</div>${foot}`;
+      d.className="node"+(nd.noselect?" static":""); d.style.width=W+"px";
+      const foot = nd.pct!=null?`<div class="foot"><span class="mn">${fmtPct(nd.pct)}</span> <span class="fu">${A.denom}</span></div>`:"";
+      const sub = nd.sub?`<div class="nt-sub">${nd.sub}</div>`:"";
+      d.innerHTML=`<div class="tag" style="color:${c}"><span class="dot" style="background:${c}"></span>${nd.tag||CATNAME[nd.cat]}</div>
+        <div class="nt">${nd.t}</div>${sub}${foot}`;
     }
-    d.addEventListener("click",()=>select(nd.id));
+    if(!nd.noselect) d.addEventListener("click",()=>select(nd.id));
     canvas.appendChild(d); el[nd.id]=d;
   });
 }
@@ -228,17 +542,64 @@ const IDLE="#cdd1da", LIVE="#0F5BFF";
 function edgePath(a,b,type){
   const aY=a.cy+(el[a.id]?el[a.id].offsetHeight/2:42), bY=b.cy+(el[b.id]?el[b.id].offsetHeight/2:42);
   if(type==="return"){
-    const low=CANH-46;
-    return `M ${a.x+nW(a)/2} ${aY} C ${a.x+nW(a)/2} ${low}, ${b.x+nW(b)/2} ${low}, ${b.x+nW(b)/2} ${bY}`;
+    const hi=34, aTop=a.cy-(el[a.id]?el[a.id].offsetHeight/2:42), bTop=b.cy-(el[b.id]?el[b.id].offsetHeight/2:42);
+    return `M ${a.x+nW(a)/2} ${aTop} C ${a.x+nW(a)/2} ${hi}, ${b.x+nW(b)/2} ${hi}, ${b.x+nW(b)/2} ${bTop}`;
+  }
+  if(type==="join"){
+    const ax=a.x+nW(a)/2, aBot=a.cy+(el[a.id]?el[a.id].offsetHeight/2:42);
+    const bx=b.x+nW(b)/2, bBot=b.cy+(el[b.id]?el[b.id].offsetHeight/2:42);
+    const low=Math.max(aBot,bBot)+52;
+    return `M ${ax} ${aBot} C ${ax} ${low}, ${bx} ${low}, ${bx} ${bBot+4}`;
   }
   const ax=a.x+nW(a), ay=a.cy, bx=b.x, by=b.cy;
-  const c=Math.max(34,(bx-ax)*0.45);
-  return `M ${ax} ${ay} C ${ax+c} ${ay}, ${bx-c} ${by}, ${bx-9} ${by}`;
+  const mx=(ax+bx)/2;
+  return `M ${ax} ${ay} C ${mx} ${ay}, ${mx} ${by}, ${bx-9} ${by}`;
+}
+function edgeLabel(x,y,text,color){
+  const lines=text.split(" / ");
+  const startY=y-(lines.length-1)*7.5;
+  const t=E("text",{x,y:startY,class:"edge","text-anchor":"middle","dominant-baseline":"middle","font-family":"Schibsted Grotesk,sans-serif","font-size":"11","font-weight":"600",fill:color,stroke:"#ffffff","stroke-width":"4","paint-order":"stroke"});
+  lines.forEach((ln,i)=>{const ts=E("tspan",{x,dy:i===0?0:15});ts.textContent=(i<lines.length-1?ln+" /":ln);t.appendChild(ts);});
+  bg.appendChild(t);
+}
+function renderGroups(){
+  [...canvas.querySelectorAll(".group")].forEach(x=>x.remove());
+  (A.groups||[]).forEach(g=>{
+    const ids=[]; let on=false;
+    for(const nd of NODES){ if(nd.id===g.from) on=true; if(on) ids.push(nd); if(nd.id===g.to) break; }
+    if(!ids.length) return;
+    let minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+    ids.forEach(nd=>{ const d=el[nd.id]; const w=nW(nd), h=d?d.offsetHeight:80;
+      minX=Math.min(minX,nd.x); maxX=Math.max(maxX,nd.x+w);
+      minY=Math.min(minY,nd.cy-h/2); maxY=Math.max(maxY,nd.cy+h/2); });
+    const padX=22, padT=38, padB=20;
+    const box=document.createElement("div"); box.className="group";
+    box.style.left=(minX-padX)+"px"; box.style.top=(minY-padT)+"px";
+    box.style.width=(maxX-minX+padX*2)+"px"; box.style.height=(maxY-minY+padT+padB)+"px";
+    box.innerHTML=`<span class="group-lbl">${g.label}</span>`;
+    canvas.appendChild(box);
+  });
+}
+function renderGhosts(){
+  [...canvas.querySelectorAll(".ghost")].forEach(x=>x.remove());
+  const s=sel?byId[sel]:null; if(!s||!s.fork) return;
+  const h=el[s.id]?el[s.id].offsetHeight:70;
+  const gw=150, gh=36, gap=26;
+  const cx=s.x+nW(s)/2, left=cx-gw/2, base=s.cy+h/2+30;
+  s.fork.alts.forEach((al,i)=>{
+    const top=base+i*(gh+gap);
+    const g=document.createElement("div");
+    g.className="ghost"; g.style.width=gw+"px"; g.style.height=gh+"px"; g.style.left=left+"px"; g.style.top=top+"px";
+    g.textContent=al.term;
+    canvas.appendChild(g);
+    al.gx=left; al.gy=top+gh/2; al.gcx=left+gw/2; al.gtop=top;
+  });
 }
 function drawEdges(){
   [...bg.querySelectorAll(".edge, defs")].forEach(x=>x.remove());
   const defs=E("defs"); defs.appendChild(ah("ah-l",IDLE)); defs.appendChild(ah("ah-b",LIVE)); bg.appendChild(defs);
-  A.edges.forEach(([f,t,type])=>{
+  A.edges.forEach((ed)=>{
+    const [f,t,type,label]=ed;
     if(type==="return" && sel!==f) return;           /* return arrow hidden until last step selected */
     const a=byId[f], b=byId[t]; if(!a||!b) return;
     const live = sel && (f===sel||t===sel);
@@ -247,37 +608,151 @@ function drawEdges(){
     const stroke = live ? LIVE : IDLE;
     const mk = live ? "url(#ah-b)" : "url(#ah-l)";
     const p=E("path",{class:"edge marching"+(live?" live":""),d,fill:"none",stroke,"marker-end":mk,"stroke-width":live?"2.3":"1.6","stroke-linecap":"round"});
-    if(sub||type==="return") p.setAttribute("stroke-dasharray","6 6");
+    if(sub||type==="return"||type==="join") p.setAttribute("stroke-dasharray","6 6");
     else if(live) p.setAttribute("stroke-dasharray",".5 7.5");
     bg.appendChild(p);
+    if(label){
+      let lx,ly;
+      if(type==="return"){ lx=((a.x+nW(a)/2)+(b.x+nW(b)/2))/2; ly=27; }
+      else { lx=((a.x+nW(a))+b.x)/2; ly=(a.cy+b.cy)/2-8; }
+      edgeLabel(lx,ly,label,"#8a91a0");
+    }
   });
+  const s=sel?byId[sel]:null;
+  if(s&&s.fork){
+    const fe=A.edges.find(e=>e[0]===sel&&e[2]==="main");
+    if(fe&&byId[fe[1]]){const b=byId[fe[1]]; edgeLabel((s.x+nW(s)+b.x)/2, s.cy-11, s.fork.pass, LIVE);}
+    const trunkX=s.x+8, oy=s.cy+(el[s.id]?el[s.id].offsetHeight/2:42);
+    s.fork.alts.forEach(al=>{
+      if(al.gx==null) return;
+      const gx=al.gx, gy=al.gy;
+      const d=`M ${trunkX} ${oy} C ${trunkX} ${gy}, ${trunkX} ${gy}, ${gx-4} ${gy}`;
+      bg.appendChild(E("path",{class:"edge",d,fill:"none",stroke:"#c2c7d0","stroke-width":"1.6","marker-end":"url(#ah-l)","stroke-dasharray":"5 5","stroke-linecap":"round"}));
+      edgeLabel(al.gcx, al.gtop-11, al.label, "#8a91a0");
+    });
+  }
 }
 function renderLegend(){
   document.getElementById("legend").innerHTML=A.legend.map(k=>
     `<span class="lg" style="color:${COLORS[k]}"><i style="background:${COLORS[k]}"></i>${CATNAME[k]}</span>`).join("");
 }
-function renderDetail(nd){
+function renderPie(items){
+  const cx=95,cy=95,r=58,sw=30,C=2*Math.PI*r;
+  let acc=0;
+  const circles=items.map((it,i)=>{
+    const f=it.pct/100, len=f*C, off=-acc*C; acc+=f;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${PIE[i%PIE.length]}" stroke-width="${sw}" stroke-linecap="butt" stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"></circle>`;
+  }).join("");
+  const legend=items.map((it,i)=>`
+    <div class="qd-leg"><i style="background:${PIE[i%PIE.length]}"></i><span class="lb" title="${it.label}">${it.label}</span><span class="pc">${it.pct.toFixed(1)}%</span></div>`).join("");
+  return `<div class="qd-pie-wrap">
+    <svg width="190" height="190" viewBox="0 0 190 190" role="img" aria-label="Detailed query-reason breakdown">${circles}
+      <text x="95" y="91" text-anchor="middle" font-family="Schibsted Grotesk,sans-serif" font-weight="600" font-size="17" fill="#0c0e13">11</text>
+      <text x="95" y="106" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#a2a8b4" letter-spacing="1.2">REASONS</text>
+    </svg>
+    <div><div class="qd-legend">${legend}</div><div class="qd-cap">Granular reasons as a share of all queries raised.</div></div>
+  </div>`;
+}
+function renderOutcomesFlow(nd){
+  const tone={pos:"#0F5BFF",neutral:"#8a91a0",neg:"#d1453b"};
+  const ys=[23,81,139,197];
+  const mk={pos:"url(#fa-pos)",neutral:"url(#fa-neu)",neg:"url(#fa-neg)"};
+  const defs=`<defs>${["pos","neutral","neg"].map(k=>`<marker id="fa-${k==="neutral"?"neu":k}" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="${tone[k]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></marker>`).join("")}</defs>`;
+  const paths=nd.outcomes.map((o,i)=>`<path d="M0 110 C 48 110 48 ${ys[i]} 92 ${ys[i]}" fill="none" stroke="${tone[o.tone]}" stroke-width="1.8" marker-end="${mk[o.tone]}"/>`).join("");
+  const outs=nd.outcomes.map(o=>`<div class="flow-out" style="border-left-color:${tone[o.tone]}"><div class="fo-pct" style="color:${tone[o.tone]}">${fmtPct(o.pct)}</div><div class="fo-l">${o.label}</div></div>`).join("");
+  return `<div class="flow">
+    <div class="flow-src"><div class="flow-src-title">Queries raised</div></div>
+    <svg class="flow-links" width="96" height="220" viewBox="0 0 96 220">${defs}${paths}</svg>
+    <div class="flow-outs">${outs}</div>
+  </div>
+  <div class="oc-cap">Share of the queries raised. Approved via change / rework and approved directly together clear the large majority; denials stay under 1%.</div>`;
+}
+function renderCategoriesFlow(nd){
+  const cards=nd.buckets.map(b=>`
+    <div class="bk cf-card">
+      <div class="cf-pct">${b.pct}</div>
+      <div class="bk-main">
+        <div class="bk-name">${b.name}</div>
+        <div class="bk-def">${b.def}</div>
+      </div>
+      <div class="bk-eye" tabindex="0" role="button" aria-label="How it's resolved">${HELP}
+        <div class="bk-pop"><b>${b.rtitle}</b><i>${b.lead}</i><ul>${b.bullets.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+      </div>
+    </div>`).join("");
+  return `<div class="catflow">
+    <div class="flow-src"><div class="flow-src-title">Queries raised</div></div>
+    <svg class="cf-links" id="cfLinks" aria-hidden="true"></svg>
+    <div class="cf-cards" id="cfCards">${cards}</div>
+  </div>`;
+}
+function layoutCatFlow(){
+  const svg=document.getElementById("cfLinks"), cards=document.getElementById("cfCards");
+  if(!svg||!cards) return;
+  const cr=cards.getBoundingClientRect();
+  const H=cr.height, W=96, cy=H/2;
+  const defs=`<defs><marker id="cf-a" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0F5BFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+  const paths=[...cards.children].map(k=>{const r=k.getBoundingClientRect();const yc=r.top-cr.top+r.height/2;return `<path d="M0 ${cy} C 48 ${cy} 48 ${yc} ${W-4} ${yc}" fill="none" stroke="#0F5BFF" stroke-width="1.8" marker-end="url(#cf-a)"/>`;}).join("");
+  svg.setAttribute("width",W);svg.setAttribute("height",H);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.innerHTML=defs+paths;
+}
+function renderQueryDetail(nd){
   const c=COLORS[nd.cat];
-  let metrics="";
-  if(nd.pct!=null){
-    const i=NODES.indexOf(nd), prev=i>0?NODES[i-1]:null;
-    const drop=(A.showDrop&&prev&&prev.count&&nd.count<prev.count)?`<div class="metric drop"><div class="v">−${Math.round((1-nd.count/prev.count)*100)}%</div><div class="k">vs previous</div></div>`:"";
-    metrics=`<div class="metrics">
-      <div class="metric lead"><div class="v">${fmtNum(nd.count)}</div><div class="k">${A.unit}</div></div>
-      <div class="metric"><div class="v">${fmtPct(nd.pct)}</div><div class="k">${A.denom}</div></div>${drop}</div>`;
+  const seg=`<div class="qv-toggle" id="qvToggle">
+      <button data-v="outcomes" class="${QV.view==='outcomes'?'on':''}">Outcomes</button>
+      <button data-v="types" class="${QV.view==='types'?'on':''}">Query categories</button></div>`;
+  let body="";
+  if(QV.view==="outcomes"){
+    body=renderOutcomesFlow(nd);
+  } else {
+    let more=`<div class="qd-more">
+        <button class="qd-more-btn ${QV.detailed?'open':''}" id="qdMore">${CHEV}${QV.detailed?'Hide detailed breakdown':'Show detailed breakdown'}</button>`;
+    if(QV.detailed) more+=renderPie(nd.granular);
+    more+=`</div>`;
+    body=renderCategoriesFlow(nd)+more;
   }
   document.getElementById("detail").innerHTML=`
     <div class="dhead">
-      <span class="dcat" style="color:${c}"><span class="dot" style="background:${c}"></span>${CATNAME[nd.cat]}</span>
-      <span class="dtitle">${nd.t}</span>${metrics}
+      <div class="dh-title">
+        <span class="dcat" style="color:${c}"><span class="dot" style="background:${c}"></span>${CATNAME[nd.cat]}</span>
+        <span class="dtitle">${nd.t}</span>
+      </div>
     </div>
     <div class="ddesc">${nd.desc}</div>
-    <div class="ex"><div class="lbl">${A.exlabel}</div><div class="txt">${nd.ex}</div></div>`;
+    ${seg}<div class="qv-body">${body}</div>`;
+  const tg=document.getElementById("qvToggle");
+  if(tg) tg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;QV.view=b.dataset.v;renderQueryDetail(nd);});
+  const mb=document.getElementById("qdMore");
+  if(mb) mb.addEventListener("click",()=>{QV.detailed=!QV.detailed;renderQueryDetail(nd);});
+  if(QV.view==="types"){ requestAnimationFrame(layoutCatFlow); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ if(document.getElementById("cfLinks")) layoutCatFlow(); }); }
+}
+function renderDetail(nd){
+  const c=COLORS[nd.cat];
+  if(nd.outcomes){ renderQueryDetail(nd); return; }
+  let metrics="";
+  if(nd.pct!=null){
+    const i=NODES.indexOf(nd), prev=i>0?NODES[i-1]:null;
+    const drop=(A.showDrop&&prev&&prev.pct&&nd.pct<prev.pct)?`<div class="metric drop"><div class="v">−${Math.round((1-nd.pct/prev.pct)*100)}%</div><div class="k">vs previous</div></div>`:"";
+    metrics=`<div class="metrics">
+      <div class="metric lead"><div class="v">${fmtPct(nd.pct)}</div><div class="k">${A.denom}</div></div>${drop}</div>`;
+  }
+  const bul=nd.bullets?`<ul class="dbul">${nd.bullets.map(x=>`<li>${x}</li>`).join("")}</ul>`:"";
+  const br=nd.branches?`<div class="dbranch">${nd.branches.map(x=>`<span class="dchip">${x}</span>`).join("")}</div>`:"";
+  const lp=nd.loop?`<div class="dloop">↻ <span>${nd.loop}</span></div>`:"";
+  const src=nd.source?`<div class="dmeta"><b>${nd.srclabel||"Source"}</b>${nd.source}</div>`:"";
+  document.getElementById("detail").innerHTML=`
+    <div class="dhead">
+      <div class="dh-title">
+        <span class="dcat" style="color:${c}"><span class="dot" style="background:${c}"></span>${nd.tag||CATNAME[nd.cat]}</span>
+        <span class="dtitle">${nd.t}</span>
+      </div>${metrics}
+    </div>
+    <div class="ddesc">${nd.desc}</div>${bul}${br}${lp}${src}`;
 }
 function select(id){
+  if(!byId[id]||byId[id].noselect) return;
   sel=id;
   NODES.forEach(nd=>{ const d=el[nd.id]; d.classList.toggle("active",nd.id===id); });
-  drawEdges(); renderDetail(byId[id]);
+  renderGhosts(); drawEdges(); renderDetail(byId[id]);
   const nd=byId[id]; const tx=nd.x+nW(nd)/2-scroll.clientWidth/2;
   scroll.scrollTo({left:Math.max(0,tx),behavior:"smooth"});
 }
@@ -287,17 +762,19 @@ function load(key){
   document.getElementById("ftitle").textContent=A.title;
   document.getElementById("fsub").textContent=A.sub;
   document.querySelectorAll("#toggle button").forEach(b=>b.classList.toggle("on",b.dataset.k===key));
-  measure(); buildNodes(); place(); renderLegend(); drawEdges();
+  measure(); buildNodes(); place(); renderGroups(); renderLegend(); drawEdges();
   select(NODES[0].id);
 }
-function relayout(){ measure(); place(); drawEdges(); }
+function relayout(){ measure(); place(); renderGroups(); renderGhosts(); drawEdges(); }
 document.getElementById("toggle").addEventListener("click",e=>{const b=e.target.closest("button");if(b)load(b.dataset.k);});
 window.addEventListener("resize",relayout);
 new ResizeObserver(()=>relayout()).observe(document.querySelector(".stage"));
 document.addEventListener("keydown",e=>{
   if(!sel)return; const i=NODES.findIndex(x=>x.id===sel);
-  if(e.key==="ArrowRight"){e.preventDefault();select(NODES[Math.min(NODES.length-1,i+1)].id);}
-  else if(e.key==="ArrowLeft"){e.preventDefault();select(NODES[Math.max(0,i-1)].id);}
+  const L=NODES.length;
+  const step=(dir)=>{for(let k=1;k<=L;k++){const j=((i+dir*k)%L+L)%L; if(!NODES[j].noselect) return NODES[j].id;} return NODES[i].id;};
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="Spacebar"){e.preventDefault();select(step(1));}
+  else if(e.key==="ArrowLeft"){e.preventDefault();select(step(-1));}
 });
 requestAnimationFrame(()=>requestAnimationFrame(()=>{load("ct");scroll.focus();}));
 </script>
