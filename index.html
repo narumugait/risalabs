@@ -37,6 +37,7 @@
     --r:20px;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);
     -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
   body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -150,8 +151,11 @@
   .bk-def{margin-top:5px;font-size:12.5px;color:var(--ink-2);line-height:1.5;max-width:72ch}
   .bk-eye{position:relative;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;color:var(--ink-3);cursor:help;outline:none;transition:.15s}
   .bk-eye:hover,.bk-eye:focus-visible{color:var(--accent);background:var(--accent-soft)}
-  .bk-pop{position:absolute;right:calc(100% + 12px);top:-8px;width:320px;background:var(--hero);color:#fff;border-radius:14px;padding:14px 16px;
+  .bk-pop{position:absolute;right:calc(100% + 12px);top:-8px;width:340px;white-space:normal;overflow-wrap:break-word;background:var(--hero);color:#fff;border-radius:14px;padding:14px 16px;
     box-shadow:0 22px 54px -20px rgba(12,14,19,.6);opacity:0;visibility:hidden;transform:translateX(6px);transition:.16s cubic-bezier(.4,0,.2,1);z-index:30;pointer-events:none}
+  .bk-how{width:auto;height:auto;padding:5px 12px;border:1px solid #dfe2ea;border-radius:999px;background:var(--bg);
+    font-family:var(--display);font-weight:600;font-size:11.5px;color:var(--ink-3);letter-spacing:-.005em;cursor:pointer;white-space:nowrap}
+  .bk-how:hover,.bk-how:focus-visible{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring)}
   .bk-eye:hover .bk-pop,.bk-eye:focus-within .bk-pop{opacity:1;visibility:visible;transform:translateX(0)}
   .bk-pop b{display:block;font-family:var(--display);font-weight:600;font-size:13px;margin-bottom:6px;color:#fff}
   .bk-pop i{font-style:normal;font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.82)}
@@ -192,12 +196,33 @@
   .flow-out .fo-pct{font-family:var(--display);font-weight:600;font-size:15px;min-width:46px;font-variant-numeric:tabular-nums}
   .flow-out .fo-l{font-size:13px;color:var(--ink)}
 
+  /* View-Denials-Funnel button (Prior Auth page) + back link + standalone page */
+  .legend-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .df-open{border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);
+    font-family:var(--display);font-weight:600;font-size:12.5px;letter-spacing:-.005em;
+    padding:8px 15px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s}
+  .df-open:hover{background:var(--accent);color:#fff}
+  .df-open:after{content:"→";font-weight:600}
+  .df-back{border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+    font-family:var(--display);font-weight:600;font-size:12.5px;padding:7px 14px;border-radius:999px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;transition:.15s}
+  .df-back:hover{color:var(--ink);background:var(--card-hover)}
+  .df-back:before{content:"←";font-weight:600}
+  .dfpage{flex:1 1 auto;overflow:auto;margin:16px 24px 22px;padding:2px 6px 0;display:flex;flex-direction:column}
+  .df-center{margin:auto 0;width:100%}
+  .dfpage .catflow{margin-top:6px}
+  .dfpage .df-back{align-self:flex-start}
+  .cf-head{margin:2px 0 18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+  .cf-head-title{font-family:var(--display);font-weight:700;font-size:16.5px;letter-spacing:-.017em;color:var(--ink);line-height:1.2}
+  .cf-head-sub{margin-top:7px;font-size:12.5px;color:var(--ink-2);line-height:1.5;max-width:86ch}
+  .cf-head-sub b{font-weight:600;color:var(--accent)}
+
   /* categories flowchart — same component as the outcomes flow */
   .catflow{display:flex;align-items:center;margin-top:4px}
   .cf-links{flex:0 0 auto;align-self:center;display:block}
   .cf-cards{flex:1 1 auto;display:flex;flex-direction:column;gap:12px}
-  .cf-card{border-top:0!important;background:var(--card);border-radius:12px;padding:14px 16px;align-items:center;border-left:3px solid var(--accent)}
-  .cf-pct{font-family:var(--display);font-weight:600;font-size:15px;color:var(--accent);min-width:60px;font-variant-numeric:tabular-nums}
+  .cf-card{border-top:0!important;background:var(--card);border-radius:12px;padding:14px 16px;align-items:center;border-left:3px solid var(--accent);grid-template-columns:58px 1fr auto}
+  .cf-pct{font-family:var(--display);font-weight:600;font-size:15px;color:var(--accent);min-width:58px;font-variant-numeric:tabular-nums}
 
   /* context-card header: category stacked above title */
   .dh-title{display:flex;flex-direction:column;gap:7px;align-items:flex-start;min-width:0}
@@ -237,7 +262,10 @@
     <div class="brand">
       <h1 id="ftitle"></h1><p id="fsub"></p>
     </div>
-    <div class="legend" id="legend"></div>
+    <div class="legend-row">
+      <div class="legend" id="legend"></div>
+      <button class="df-open" id="dfOpen" hidden>View Denials Funnel</button>
+    </div>
   </div>
 
   <div class="stage">
@@ -247,6 +275,8 @@
   </div>
 
   <div class="detail" id="detail"></div>
+
+  <div class="dfpage" id="dfpage" hidden></div>
 
 <script>
 const COLORS={engine:"#0F5BFF",careteam:"#0f8a7e",patient:"#c06a2e",payer:"#7c53c9",system:"#0F5BFF",risa:"#0F5BFF",prov:"#c06a2e",pat:"#7c53c9",hitl:"#CA8A04"};
@@ -705,24 +735,31 @@ function renderOutcomesFlow(nd){
   </div>
   <div class="oc-cap">Share of the queries raised. Approved via change / rework and approved directly together clear the large majority; denials stay under 1%.</div>`;
 }
-function renderCategoriesFlow(nd){
-  const cards=nd.buckets.map(b=>`
+const DF_HEAD=`<div class="cf-head">
+      <div class="cf-head-title">Interventions Driving High Prior Auth Approval Rates</div>
+      <div class="cf-head-sub">~<b>$7.5M</b> prevented in denials across <b>5,561</b> RISA-flagged / queried orders (May 2026 - June 2026).</div>
+    </div>`;
+function renderBuckets(nd){
+  return nd.buckets.map(b=>`
     <div class="bk cf-card">
       <div class="cf-pct">${b.pct}</div>
       <div class="bk-main">
         <div class="bk-name">${b.name}</div>
         <div class="bk-def">${b.def}</div>
       </div>
-      <div class="bk-eye" tabindex="0" role="button" aria-label="How it's resolved">${HELP}
+      <div class="bk-eye bk-how" tabindex="0" role="button" aria-label="How RISA resolves this">how?
         <div class="bk-pop"><b>${b.rtitle}</b><i>${b.lead}</i><ul>${b.bullets.map(x=>`<li>${x}</li>`).join("")}</ul></div>
       </div>
     </div>`).join("");
-  return `<div class="catflow">
-    <div class="flow-src"><div class="flow-src-title">Queries raised</div></div>
+}
+function renderCatFan(nd, srcLabel, showHead){
+  return `${showHead?DF_HEAD:""}<div class="catflow">
+    <div class="flow-src"><div class="flow-src-title">${srcLabel}</div></div>
     <svg class="cf-links" id="cfLinks" aria-hidden="true"></svg>
-    <div class="cf-cards" id="cfCards">${cards}</div>
+    <div class="cf-cards" id="cfCards">${renderBuckets(nd)}</div>
   </div>`;
 }
+function renderCategoriesFlow(nd){ return renderCatFan(nd, "Queries raised", true); }
 function layoutCatFlow(){
   const svg=document.getElementById("cfLinks"), cards=document.getElementById("cfCards");
   if(!svg||!cards) return;
@@ -794,21 +831,60 @@ function select(id){
   const nd=byId[id]; const tx=nd.x+nW(nd)/2-scroll.clientWidth/2;
   scroll.scrollTo({left:Math.max(0,tx),behavior:"smooth"});
 }
+let DFdetail=false;
+function renderDFbody(){
+  let more=`<div class="qd-more"><button class="qd-more-btn ${DFdetail?'open':''}" id="dfMore">${CHEV}${DFdetail?'Hide detailed categories':'View detailed categories'}</button>`;
+  if(DFdetail) more+=renderPie(QUERY_PANEL.granular);
+  more+=`</div>`;
+  return `<button class="df-back" id="dfBack">Back to Prior authorization</button>
+    <div class="df-center">${renderCatFan(QUERY_PANEL,"Denials prevented categories",false)}</div>
+    ${more}`;
+}
+function paintDF(){
+  const dp=document.getElementById("dfpage");
+  dp.innerHTML=renderDFbody();
+  const bk=document.getElementById("dfBack"); if(bk) bk.addEventListener("click",()=>load("pa"));
+  const mo=document.getElementById("dfMore"); if(mo) mo.addEventListener("click",()=>{DFdetail=!DFdetail; paintDF();});
+  requestAnimationFrame(()=>requestAnimationFrame(layoutCatFlow));
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ if(FK==="df"&&document.getElementById("cfLinks")) layoutCatFlow(); });
+}
+function showDenialsPage(){
+  document.querySelector(".stage").hidden=true;
+  document.getElementById("detail").hidden=true;
+  const lg=document.querySelector(".legend"); if(lg) lg.style.display="none";
+  const kb=document.querySelector(".kbd-hint"); if(kb) kb.style.display="none";
+  const df=document.getElementById("dfOpen"); if(df) df.hidden=true;
+  document.querySelectorAll("#toggle button").forEach(b=>b.classList.toggle("on",b.dataset.k==="pa"));
+  document.getElementById("ftitle").textContent="Interventions Driving High Prior Auth Approval Rates";
+  document.getElementById("fsub").innerHTML='~<b style="color:var(--accent);font-weight:600">$7.5M</b> prevented in denials across <b style="color:var(--accent);font-weight:600">5,561</b> RISA-flagged / queried orders (May 2026 - June 2026).';
+  DFdetail=false;
+  document.getElementById("dfpage").hidden=false;
+  paintDF();
+}
 function load(key){
-  FK=key; A=FUNNELS[key]; NODES=A.nodes; byId={}; NODES.forEach(x=>byId[x.id]=x);
+  FK=key;
+  if(key==="df"){ showDenialsPage(); return; }
+  document.querySelectorAll("#toggle button").forEach(b=>b.classList.toggle("on",b.dataset.k===key));
+  document.querySelector(".stage").hidden=false;
+  document.getElementById("detail").hidden=false;
+  document.getElementById("dfpage").hidden=true;
+  const lg=document.querySelector(".legend"); if(lg) lg.style.display="";
+  const kb=document.querySelector(".kbd-hint"); if(kb) kb.style.display="";
+  const df=document.getElementById("dfOpen"); if(df) df.hidden=(key!=="pa");
+  A=FUNNELS[key]; NODES=A.nodes; byId={}; NODES.forEach(x=>byId[x.id]=x);
   lastId=NODES[NODES.length-1].id;
   document.getElementById("ftitle").textContent=A.title;
   document.getElementById("fsub").textContent=A.sub;
-  document.querySelectorAll("#toggle button").forEach(b=>b.classList.toggle("on",b.dataset.k===key));
   measure(); buildNodes(); place(); renderGroups(); renderLegend(); drawEdges();
   select(NODES[0].id);
 }
-function relayout(){ measure(); place(); renderGroups(); renderGhosts(); drawEdges(); }
+function relayout(){ if(FK==="df"){ layoutCatFlow(); return; } measure(); place(); renderGroups(); renderGhosts(); drawEdges(); }
 document.getElementById("toggle").addEventListener("click",e=>{const b=e.target.closest("button");if(b)load(b.dataset.k);});
+document.getElementById("dfOpen").addEventListener("click",()=>load("df"));
 window.addEventListener("resize",relayout);
 new ResizeObserver(()=>relayout()).observe(document.querySelector(".stage"));
 document.addEventListener("keydown",e=>{
-  if(!sel)return; const i=NODES.findIndex(x=>x.id===sel);
+  if(FK==="df"||!sel)return; const i=NODES.findIndex(x=>x.id===sel);
   const L=NODES.length;
   const step=(dir)=>{for(let k=1;k<=L;k++){const j=((i+dir*k)%L+L)%L; if(!NODES[j].noselect) return NODES[j].id;} return NODES[i].id;};
   if(e.key==="ArrowRight"||e.key===" "||e.key==="Spacebar"){e.preventDefault();select(step(1));}
