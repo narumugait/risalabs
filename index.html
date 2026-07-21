@@ -3,6 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* Keep the horizontal desktop layout on phones/tablets (no vertical responsive mode) */
+(function(){try{
+  var coarse = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+  if(coarse || window.innerWidth < 820){
+    var m=document.querySelector('meta[name="viewport"]');
+    if(m) m.setAttribute("content","width=1440");
+    document.documentElement.setAttribute("data-wide","1");
+  }
+}catch(e){}})();
+</script>
 <title>RISA Funnels</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +33,10 @@
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);
     -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.55}
   body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  /* On phones/tablets we force a fixed 1440-wide desktop viewport (see head script).
+     100vh under that fixed width blows up very tall on a portrait screen, so pin a
+     fixed landscape height instead — the whole horizontal layout stays intact. */
+  html[data-wide],html[data-wide] body{height:820px;min-height:820px;overflow:hidden}
 
   .head{position:relative;padding:24px 32px 0;display:flex;flex-direction:column;gap:14px}
   .toggle{position:absolute;top:24px;right:32px;z-index:5;display:inline-flex;background:var(--card);border-radius:999px;padding:4px;gap:2px}
@@ -189,6 +204,7 @@
   .dmeta b{font-family:var(--display);font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-size:10px;margin-right:9px}
 
   /* non-selectable terminal cards */
+  .node.span{display:flex;flex-direction:column;justify-content:center}
   .node.static{opacity:.5;cursor:default;border:1px dashed #ccd1db;background:#f5f6f8}
   .node.static:hover{opacity:.5;background:#f5f6f8}
 
@@ -337,7 +353,7 @@ const FUNNELS={
    n("onfile",4.5,-0.9,"risa","Auth on file","A valid authorization already covers this drug and patient, so the order clears against it.",""),
    n("authreq",4.5,0,"risa","Auth required","A new authorization is needed. The order enters the filing path, which RISA runs on Autopilot.",""),
    n("mednec",6,0,"risa","Medical necessity check","Every routed order is checked for medical necessity against payer policy and clinical guidelines. No-auth and auth-on-file cases are documented back to the EMR; auth-required cases proceed to filing.",""),
-   n("docwb",7,-1.15,"risa","Medical necessity requirements checked and reported, even if prior auth is not required, to avoid claims denials","For no-auth and auth-on-file cases, RISA still checks and reports medical necessity to the EMR, so later claims are not denied.",""),
+   n("docwb",7,-1.375,"risa","Act against medical necessity criteria, even if prior auth is not required, to avoid claims denial","For no-auth and auth-on-file cases, RISA still checks and reports medical necessity to the EMR, so later claims are not denied.",""),
    n("query",7,1.35,"risa","Query raised","If the necessity check finds missing information, RISA raises a query to close the gap before filing.",""),
    n("qaccept",8,0.75,"hitl","Query accepted","The query is accepted and the missing information is supplied by the provider.",""),
    n("qnochange",8,1.95,"risa","No changes made","The query returns nothing new, so the order proceeds on the existing record.",""),
@@ -417,6 +433,7 @@ const QUERY_PANEL={
 };
 ["query","qaccept"].forEach(id=>{const nd=FUNNELS.pa.nodes.find(n=>n.id===id); if(nd) Object.assign(nd,QUERY_PANEL);});
 ["docwb","qnochange"].forEach(id=>{const nd=FUNNELS.pa.nodes.find(n=>n.id===id); if(nd) nd.noselect=true;});
+{const dw=FUNNELS.pa.nodes.find(n=>n.id==="docwb"); if(dw) dw.spanRows=["noauth","onfile"];}
 
 /* Full copy for the selectable Prior Authorization steps (context: RISA architecture) */
 const PA_COPY={
@@ -470,7 +487,7 @@ const PA_COPY={
    source:"Payer questionnaire templates from the Submission bots; each answer linked to the attached HL7 FHIR DocumentReference."},
  submit:{srclabel:"Data & exchange",
    desc:"Everything is bundled into a complete, auditable package, ready for a person to review and submit.",
-   bullets:["Accurate coding, dosages and units are included per the plan's rules.","RISA decides which CPT codes go through which portals.","Every field, citation and attachment is logged with its source for a full audit trail."],
+   bullets:["Accurate coding, dosages and units are included per the plan's rules.","A denial prediction score is computed and shown for the case, so risk is visible before it is submitted.","RISA decides which CPT codes go through which portals.","Every field, citation and attachment is logged with its source for a full audit trail."],
    source:"Assembled from HL7 FHIR chart data, compendia citations and payer templates; routed per payer to portal, X12 278 or fax."},
  rev:{srclabel:"Data & exchange",
    desc:"A person reviews the assembled package and submits it to the payer. This is the human-in-the-loop checkpoint before anything leaves the practice.",
@@ -521,7 +538,7 @@ function buildNodes(){
       d.className="node system"; d.style.width=EMRW+"px";
       d.innerHTML=`<div class="emr-logo"><span class="emr-mark">${ONCO_MARK}</span><span class="emr-word"><b>ONCO</b><span class="e2">EMR</span><sup>®</sup></span></div>`;
     } else {
-      d.className="node"+(nd.noselect?" static":""); d.style.width=W+"px";
+      d.className="node"+(nd.noselect?" static":"")+(nd.spanRows?" span":""); d.style.width=W+"px";
       const foot = nd.pct!=null?`<div class="foot"><span class="mn">${fmtPct(nd.pct)}</span> <span class="fu">${A.denom}</span></div>`:"";
       const sub = nd.sub?`<div class="nt-sub">${nd.sub}</div>`:"";
       d.innerHTML=`<div class="tag" style="color:${c}"><span class="dot" style="background:${c}"></span>${nd.tag||CATNAME[nd.cat]}</div>
@@ -531,7 +548,12 @@ function buildNodes(){
     canvas.appendChild(d); el[nd.id]=d;
   });
 }
-function place(){ NODES.forEach(nd=>{ const d=el[nd.id]; if(!d)return; const h=d.offsetHeight; d.style.left=nd.x+"px"; d.style.top=(nd.cy-h/2)+"px"; }); }
+function place(){
+  NODES.forEach(nd=>{ const d=el[nd.id]; if(!d)return; const h=d.offsetHeight; d.style.left=nd.x+"px"; d.style.top=(nd.cy-h/2)+"px"; });
+  NODES.forEach(nd=>{ if(!nd.spanRows)return; const a=el[nd.spanRows[0]], b=el[nd.spanRows[1]], d=el[nd.id]; if(!a||!b||!d)return;
+    const top=parseFloat(a.style.top), bot=parseFloat(b.style.top)+b.offsetHeight;
+    d.style.top=top+"px"; d.style.height=(bot-top)+"px"; nd.cy=top+(bot-top)/2; });
+}
 
 function ah(id,color){
   const m=E("marker",{id,viewBox:"0 0 10 10",refX:"7.5",refY:"5",markerWidth:"6.5",markerHeight:"6.5",orient:"auto-start-reverse"});
